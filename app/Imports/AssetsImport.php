@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Asset;
 use App\Models\Category;
 use App\Services\AssetCodeGeneratorService;
+use App\Services\CategoryDetectorService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
@@ -12,18 +13,31 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 class AssetsImport implements ToModel, WithHeadingRow, WithValidation
 {
     private AssetCodeGeneratorService $codeGenerator;
+    private CategoryDetectorService $categoryDetector;
 
     public function __construct()
     {
         $this->codeGenerator = app(AssetCodeGeneratorService::class);
+        $this->categoryDetector = app(CategoryDetectorService::class);
     }
 
     public function model(array $row)
     {
-        $category = Category::where('name', $row['kategori'])
-            ->orWhere('prefix', strtoupper($row['kategori'] ?? ''))
-            ->first();
+        // Try to get category from kategori column first
+        $category = null;
+        
+        if (!empty($row['kategori'])) {
+            $category = Category::where('name', $row['kategori'])
+                ->orWhere('prefix', strtoupper($row['kategori'] ?? ''))
+                ->first();
+        }
+        
+        // If category not found or empty, try auto-detect from nama_asset
+        if (!$category && !empty($row['nama_asset'])) {
+            $category = $this->categoryDetector->detectCategory($row['nama_asset']);
+        }
 
+        // If still no category found, skip this row
         if (!$category) {
             return null;
         }
@@ -65,7 +79,7 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
     {
         return [
             'nama_asset' => ['required', 'string'],
-            'kategori' => ['required', 'string'],
+            // kategori is now optional since we have auto-detection
         ];
     }
 }

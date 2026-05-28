@@ -124,7 +124,7 @@ class AssetController extends Controller
             [
                 'nama_asset' => 'Laptop Dell Latitude 5520',
                 'kode_asset' => '',  // Leave empty for auto-generate
-                'kategori' => 'KOMPUTER',
+                'kategori' => '',  // Leave empty for auto-detect (will detect as KOMPUTER/LAP)
                 'merk' => 'Dell',
                 'model' => 'Latitude 5520',
                 'serial_number' => 'SN123456789',
@@ -134,9 +134,21 @@ class AssetController extends Controller
                 'deskripsi' => 'Laptop untuk staff IT'
             ],
             [
+                'nama_asset' => 'Headset Logitech H390',
+                'kode_asset' => '',  // Auto-generate
+                'kategori' => '',  // Auto-detect (will detect as AUDIO/HEADSET)
+                'merk' => 'Logitech',
+                'model' => 'H390',
+                'serial_number' => 'SN987654321',
+                'kondisi' => 'baik',
+                'status' => 'available',
+                'lokasi' => 'Room 102',
+                'deskripsi' => 'Headset USB untuk meeting'
+            ],
+            [
                 'nama_asset' => 'ADAPTER NOTEBOOK',
                 'kode_asset' => 'ADP0001061',  // Can provide existing code
-                'kategori' => 'ADAPTER',
+                'kategori' => 'ADAPTER',  // Or specify exact category
                 'merk' => 'HP',
                 'model' => 'PPP009D',
                 'serial_number' => 'WEBPE0BAR9T94L',
@@ -187,11 +199,11 @@ class AssetController extends Controller
         $instructions = [
             ['', ''],
             ['Required Fields:', ''],
-            ['- nama_asset', 'Asset name (required)'],
-            ['- kategori', 'Category name or prefix (required)'],
+            ['- nama_asset', 'Asset name (REQUIRED - must be filled)'],
             ['', ''],
             ['Optional Fields:', ''],
-            ['- kode_asset', 'Asset code (leave EMPTY for auto-generate, or fill with existing code)'],
+            ['- kategori', 'Category name/prefix (OPTIONAL - auto-detect if empty)'],
+            ['- kode_asset', 'Asset code (OPTIONAL - auto-generate if empty)'],
             ['- merk', 'Brand name'],
             ['- model', 'Model name'],
             ['- serial_number', 'Serial number'],
@@ -200,16 +212,32 @@ class AssetController extends Controller
             ['- lokasi', 'Location (free text)'],
             ['- deskripsi', 'Description'],
             ['', ''],
+            ['AUTO-CATEGORIZATION:', ''],
+            ['System can auto-detect category from nama_asset if kategori is empty:'],
+            ['- "Laptop Dell" → KOM/LAP (Komputer/Laptop)'],
+            ['- "Headset Logitech" → AUD/HEADSET (Audio/Headset)'],
+            ['- "Keyboard Mechanical" → PER/KEYBOARD (Peripherals)'],
+            ['- "Mouse Wireless" → PER/MOUSE (Peripherals)'],
+            ['- "Monitor LED" → MON (Monitor)'],
+            ['- "Printer HP" → PRT (Printer)'],
+            ['- "Adapter Notebook" → ADP/ADAPTER (Adapter)'],
+            ['- "Router TP-Link" → NET/ROUTER (Network)'],
+            ['+ and many more keywords...'],
+            ['', ''],
             ['IMPORTANT NOTES:', ''],
-            ['1. kode_asset:', ''],
+            ['1. kategori field:', ''],
+            ['   - Leave EMPTY: System will auto-detect from nama_asset'],
+            ['   - Fill manually: Use specific category name or prefix'],
+            ['', ''],
+            ['2. kode_asset field:', ''],
             ['   - Leave EMPTY: System will auto-generate new code'],
             ['   - Fill with code: Use existing asset code (for migrating old data)'],
             ['   - If code exists: Row will be skipped to prevent duplicates'],
             ['', ''],
-            ['2. Category must exist in the system before importing'],
-            ['3. kondisi will default to "baik" if not specified'],
-            ['4. status will default to "available" if not specified'],
-            ['5. Remove example data before uploading your file'],
+            ['3. Category must exist in the system before importing'],
+            ['4. kondisi will default to "baik" if not specified'],
+            ['5. status will default to "available" if not specified'],
+            ['6. Remove example data before uploading your file'],
         ];
 
         $row = 2;
