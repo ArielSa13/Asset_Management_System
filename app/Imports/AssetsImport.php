@@ -55,11 +55,13 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
             $kodeAsset = $this->codeGenerator->generate($category);
         }
 
-        // Normalize kondisi to lowercase
+        // Normalize kondisi to lowercase and map non-standard values
         $kondisi = !empty($row['kondisi']) ? strtolower(trim($row['kondisi'])) : 'baik';
+        $kondisi = $this->normalizeKondisi($kondisi);
         
-        // Normalize status to lowercase
+        // Normalize status to lowercase and map non-standard values
         $status = !empty($row['status']) ? strtolower(trim($row['status'])) : 'available';
+        $status = $this->normalizeStatus($status);
 
         return new Asset([
             'kode_asset' => $kodeAsset,
@@ -73,6 +75,83 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
             'lokasi' => $row['lokasi'] ?? null,
             'deskripsi' => $row['deskripsi'] ?? null,
         ]);
+    }
+
+    /**
+     * Normalize kondisi value to match ENUM in database
+     * Valid: baik, cukup, rusak_ringan, rusak_berat
+     */
+    private function normalizeKondisi(string $kondisi): string
+    {
+        $mapping = [
+            'baik' => 'baik',
+            'bagus' => 'baik',
+            'good' => 'baik',
+            'baru' => 'baik',
+            'new' => 'baik',
+            
+            'cukup' => 'cukup',
+            'sedang' => 'cukup',
+            'fair' => 'cukup',
+            'normal' => 'cukup',
+            
+            'rusak_ringan' => 'rusak_ringan',
+            'rusak ringan' => 'rusak_ringan',
+            'minor' => 'rusak_ringan',
+            'rusak' => 'rusak_ringan',
+            
+            'rusak_berat' => 'rusak_berat',
+            'rusak berat' => 'rusak_berat',
+            'major' => 'rusak_berat',
+            'broken' => 'rusak_berat',
+            'hancur' => 'rusak_berat',
+        ];
+
+        return $mapping[$kondisi] ?? 'baik';
+    }
+
+    /**
+     * Normalize status value to match ENUM in database
+     * Valid: available, borrowed, maintenance, broken, lost
+     */
+    private function normalizeStatus(string $status): string
+    {
+        $mapping = [
+            'available' => 'available',
+            'tersedia' => 'available',
+            'aktif' => 'available',
+            'active' => 'available',
+            'ready' => 'available',
+            
+            'borrowed' => 'borrowed',
+            'dipinjam' => 'borrowed',
+            'pinjam' => 'borrowed',
+            'in use' => 'borrowed',
+            'inuse' => 'borrowed',
+            
+            'maintenance' => 'maintenance',
+            'perbaikan' => 'maintenance',
+            'repair' => 'maintenance',
+            'service' => 'maintenance',
+            
+            'broken' => 'broken',
+            'rusak' => 'broken',
+            'damaged' => 'broken',
+            
+            'lost' => 'lost',
+            'hilang' => 'lost',
+            'missing' => 'lost',
+            
+            // Non-standard values
+            'retired' => 'maintenance',
+            'disposed' => 'lost',
+            'scrap' => 'broken',
+            'tidak aktif' => 'maintenance',
+            'inactive' => 'maintenance',
+            'off' => 'maintenance',
+        ];
+
+        return $mapping[$status] ?? 'available';
     }
 
     public function rules(): array
