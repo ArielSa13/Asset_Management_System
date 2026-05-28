@@ -11,7 +11,7 @@ class AssetsExport implements FromCollection, WithHeadings, WithMapping
 {
     public function collection()
     {
-        return Asset::with(['category', 'location'])->get();
+        return Asset::with(['category'])->get();
     }
 
     public function headings(): array

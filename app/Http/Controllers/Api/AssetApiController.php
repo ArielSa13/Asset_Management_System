@@ -15,7 +15,7 @@ class AssetApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $assets = Asset::with(['category', 'location'])
+        $assets = Asset::with(['category'])
             ->search($request->search)
             ->filterStatus($request->status)
             ->filterCategory($request->category_id ? (int) $request->category_id : null)
@@ -32,7 +32,7 @@ class AssetApiController extends Controller
      */
     public function show(Asset $asset): JsonResponse
     {
-        $asset->load(['category', 'location', 'activeBorrowing']);
+        $asset->load(['category', 'activeBorrowing']);
 
         return response()->json([
             'success' => true,
@@ -45,7 +45,7 @@ class AssetApiController extends Controller
      */
     public function scan(string $kode): JsonResponse
     {
-        $asset = Asset::with(['category', 'location', 'activeBorrowing'])
+        $asset = Asset::with(['category', 'activeBorrowing'])
             ->where('kode_asset', $kode)
             ->first();
 

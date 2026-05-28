@@ -18,7 +18,7 @@ class ScanController extends Controller
      */
     public function show(string $kode)
     {
-        $asset = Asset::with(['category', 'location', 'activeBorrowing', 'borrowings' => function ($q) {
+        $asset = Asset::with(['category', 'activeBorrowing', 'borrowings' => function ($q) {
             $q->orderByDesc('created_at')->limit(5);
         }])->where('kode_asset', $kode)->firstOrFail();
 
