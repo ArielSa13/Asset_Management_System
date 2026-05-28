@@ -73,7 +73,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Export/Import
     Route::get('export/assets', [ExportController::class, 'exportAssets'])->name('export.assets');
     Route::get('export/borrowings', [ExportController::class, 'exportBorrowings'])->name('export.borrowings');
-    Route::post('import/assets', [ExportController::class, 'importAssets'])->name('import.assets');
+    Route::post('import/assets/preview', [ExportController::class, 'previewImport'])->name('import.assets.preview');
+    Route::post('import/assets/confirm', [ExportController::class, 'confirmImport'])->name('import.assets.confirm');
 });
 
 // Redirect root to login or dashboard
