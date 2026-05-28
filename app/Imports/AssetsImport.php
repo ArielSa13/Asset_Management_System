@@ -40,9 +40,6 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
             'kondisi' => $row['kondisi'] ?? 'baik',
             'status' => 'available',
             'lokasi' => $row['lokasi'] ?? null,
-            'tanggal_pembelian' => $row['tanggal_pembelian'] ?? null,
-            'harga' => $row['harga'] ?? null,
-            'supplier' => $row['supplier'] ?? null,
             'deskripsi' => $row['deskripsi'] ?? null,
         ]);
     }

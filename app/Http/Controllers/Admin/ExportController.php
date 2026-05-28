@@ -19,7 +19,7 @@ class ExportController extends Controller
         $format = $request->get('format', 'xlsx');
 
         if ($format === 'pdf') {
-            $assets = Asset::with(['category', 'location'])->get();
+            $assets = Asset::with(['category'])->get();
             $pdf = Pdf::loadView('exports.assets-pdf', compact('assets'));
             return $pdf->download('assets-report.pdf');
         }
