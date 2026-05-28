@@ -75,6 +75,7 @@ class ExportController extends Controller
 
             $status = 'valid';
             $reason = '';
+            $isFallback = false;
 
             // Check category
             $category = null;
@@ -85,12 +86,11 @@ class ExportController extends Controller
             }
             if (!$category) {
                 $category = $categoryDetector->detectCategory($data['nama_asset']);
-            }
-
-            if (!$category) {
-                $status = 'skip';
-                $reason = 'Kategori tidak ditemukan & tidak bisa auto-detect';
-                $skipCount++;
+                // Check if it fell back to "Perangkat Lainnya"
+                if ($category && $category->prefix === 'OTH') {
+                    $isFallback = true;
+                    $reason = 'Auto → Perangkat Lainnya';
+                }
             }
 
             // Check duplicate kode_asset
@@ -108,7 +108,7 @@ class ExportController extends Controller
             }
 
             $preview[] = [
-                'row' => $index + 2, // +2 karena index 0 dan header row
+                'row' => $index + 2,
                 'nama_asset' => $data['nama_asset'],
                 'kode_asset' => $data['kode_asset'] ?? '(auto-generate)',
                 'kategori' => $data['kategori'] ?? '(auto-detect)',
@@ -117,6 +117,7 @@ class ExportController extends Controller
                 'serial_number' => $data['serial_number'] ?? '-',
                 'kondisi' => $data['kondisi'] ?? 'baik',
                 'status_import' => $status,
+                'is_fallback' => $isFallback,
                 'reason' => $reason,
             ];
         }

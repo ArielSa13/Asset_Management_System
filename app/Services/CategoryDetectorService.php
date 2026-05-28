@@ -109,6 +109,7 @@ class CategoryDetectorService
 
     /**
      * Detect category from asset name
+     * Falls back to "Perangkat Lainnya" if no keyword matches
      */
     public function detectCategory(string $assetName): ?Category
     {
@@ -131,7 +132,34 @@ class CategoryDetectorService
             }
         }
         
-        return null;
+        // Fallback: assign to "Perangkat Lainnya" category
+        return $this->getFallbackCategory();
+    }
+
+    /**
+     * Get or create the fallback category "Perangkat Lainnya"
+     */
+    public function getFallbackCategory(): ?Category
+    {
+        // Try to find existing fallback category
+        $fallback = Category::where('prefix', 'OTH')
+            ->orWhere('name', 'Perangkat Lainnya')
+            ->orWhere('name', 'Lainnya')
+            ->orWhere('name', 'Others')
+            ->orWhere('prefix', 'LAIN')
+            ->first();
+
+        if ($fallback) {
+            return $fallback;
+        }
+
+        // Auto-create "Perangkat Lainnya" category if not exists
+        return Category::create([
+            'name' => 'Perangkat Lainnya',
+            'prefix' => 'OTH',
+            'description' => 'Kategori untuk asset yang tidak terdeteksi secara otomatis',
+            'is_active' => true,
+        ]);
     }
 
     /**

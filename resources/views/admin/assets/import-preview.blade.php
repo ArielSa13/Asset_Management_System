@@ -71,7 +71,7 @@
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Kategori</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Merk</th>
                         <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">SN</th>
-                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Alasan Skip</th>
+                        <th class="px-4 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Keterangan</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
@@ -95,14 +95,24 @@
                         <td class="px-4 py-3 font-mono text-xs text-gray-700 dark:text-gray-300">{{ $item['kode_asset'] }}</td>
                         <td class="px-4 py-3 text-gray-700 dark:text-gray-300">
                             @if($item['category_found'])
-                                <span class="text-green-600 dark:text-green-400">{{ $item['category_found'] }}</span>
+                                @if($item['is_fallback'] ?? false)
+                                    <span class="text-yellow-600 dark:text-yellow-400">{{ $item['category_found'] }}</span>
+                                @else
+                                    <span class="text-green-600 dark:text-green-400">{{ $item['category_found'] }}</span>
+                                @endif
                             @else
                                 <span class="text-red-500">{{ $item['kategori'] }}</span>
                             @endif
                         </td>
                         <td class="px-4 py-3 text-gray-500 dark:text-gray-400">{{ $item['merk'] }}</td>
                         <td class="px-4 py-3 font-mono text-xs text-gray-500 dark:text-gray-400">{{ Str::limit($item['serial_number'], 15) }}</td>
-                        <td class="px-4 py-3 text-xs text-red-600 dark:text-red-400">{{ $item['reason'] }}</td>
+                        <td class="px-4 py-3 text-xs">
+                            @if($item['status_import'] === 'skip')
+                                <span class="text-red-600 dark:text-red-400">{{ $item['reason'] }}</span>
+                            @elseif($item['is_fallback'] ?? false)
+                                <span class="text-yellow-600 dark:text-yellow-400">{{ $item['reason'] }}</span>
+                            @endif
+                        </td>
                     </tr>
                     @endforeach
                 </tbody>
