@@ -50,12 +50,7 @@
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location</label>
-                    <select name="location_id" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
-                        <option value="">Select Location</option>
-                        @foreach($locations as $location)
-                        <option value="{{ $location->id }}" {{ old('location_id', $asset->location_id) == $location->id ? 'selected' : '' }}>{{ $location->full_location }}</option>
-                        @endforeach
-                    </select>
+                    <input type="text" name="lokasi" value="{{ old('lokasi', $asset->lokasi) }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500" placeholder="e.g. Room 101, Floor 2">
                 </div>
             </div>
         </div>
@@ -81,10 +76,6 @@
                         <option value="broken" {{ old('status', $asset->status) == 'broken' ? 'selected' : '' }}>Broken</option>
                         <option value="lost" {{ old('status', $asset->status) == 'lost' ? 'selected' : '' }}>Lost</option>
                     </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location Name</label>
-                    <input type="text" name="lokasi" value="{{ old('lokasi', $asset->lokasi) }}" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
                 </div>
             </div>
         </div>

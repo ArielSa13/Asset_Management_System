@@ -7,7 +7,6 @@ use App\Http\Requests\Asset\StoreAssetRequest;
 use App\Http\Requests\Asset\UpdateAssetRequest;
 use App\Models\Asset;
 use App\Models\Category;
-use App\Models\Location;
 use App\Services\AssetService;
 use App\Services\QrCodeService;
 use Illuminate\Http\Request;
@@ -38,9 +37,8 @@ class AssetController extends Controller
     public function create()
     {
         $categories = Category::active()->get();
-        $locations = Location::active()->get();
 
-        return view('admin.assets.create', compact('categories', 'locations'));
+        return view('admin.assets.create', compact('categories'));
     }
 
     public function store(StoreAssetRequest $request)
@@ -71,9 +69,8 @@ class AssetController extends Controller
     public function edit(Asset $asset)
     {
         $categories = Category::active()->get();
-        $locations = Location::active()->get();
 
-        return view('admin.assets.edit', compact('asset', 'categories', 'locations'));
+        return view('admin.assets.edit', compact('asset', 'categories'));
     }
 
     public function update(UpdateAssetRequest $request, Asset $asset)
