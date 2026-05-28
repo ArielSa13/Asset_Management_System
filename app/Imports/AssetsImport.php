@@ -6,80 +6,93 @@ use App\Models\Asset;
 use App\Models\Category;
 use App\Services\AssetCodeGeneratorService;
 use App\Services\CategoryDetectorService;
-use Maatwebsite\Excel\Concerns\ToModel;
+use App\Services\QrCodeService;
+use Illuminate\Support\Collection;
+use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class AssetsImport implements ToModel, WithHeadingRow
+class AssetsImport implements ToCollection, WithHeadingRow
 {
     private AssetCodeGeneratorService $codeGenerator;
     private CategoryDetectorService $categoryDetector;
+    private QrCodeService $qrCodeService;
 
     public function __construct()
     {
         $this->codeGenerator = app(AssetCodeGeneratorService::class);
         $this->categoryDetector = app(CategoryDetectorService::class);
+        $this->qrCodeService = app(QrCodeService::class);
     }
 
-    public function model(array $row)
+    public function collection(Collection $rows)
     {
-        // Map flexible column names to standard fields
-        $data = $this->mapColumns($row);
+        foreach ($rows as $row) {
+            $rowArray = $row->toArray();
 
-        // Skip empty rows
-        if (empty($data['nama_asset'])) {
-            return null;
-        }
+            // Map flexible column names to standard fields
+            $data = $this->mapColumns($rowArray);
 
-        // Try to get category from kategori column first
-        $category = null;
-        
-        if (!empty($data['kategori'])) {
-            $category = Category::where('name', $data['kategori'])
-                ->orWhere('prefix', strtoupper($data['kategori']))
-                ->first();
-        }
-        
-        // If category not found or empty, try auto-detect from nama_asset
-        if (!$category) {
-            $category = $this->categoryDetector->detectCategory($data['nama_asset']);
-        }
-
-        // If still no category found, skip this row
-        if (!$category) {
-            return null;
-        }
-
-        // Check if kode_asset is provided, if not generate new one
-        if (!empty($data['kode_asset'])) {
-            // Check if asset with this code already exists
-            $existingAsset = Asset::where('kode_asset', $data['kode_asset'])->first();
-            if ($existingAsset) {
-                return null;
+            // Skip empty rows
+            if (empty($data['nama_asset'])) {
+                continue;
             }
-            $kodeAsset = $data['kode_asset'];
-        } else {
-            $kodeAsset = $this->codeGenerator->generate($category);
+
+            // Try to get category from kategori column first
+            $category = null;
+
+            if (!empty($data['kategori'])) {
+                $category = Category::where('name', $data['kategori'])
+                    ->orWhere('prefix', strtoupper($data['kategori']))
+                    ->first();
+            }
+
+            // If category not found or empty, try auto-detect from nama_asset
+            if (!$category) {
+                $category = $this->categoryDetector->detectCategory($data['nama_asset']);
+            }
+
+            // If still no category found, skip this row
+            if (!$category) {
+                continue;
+            }
+
+            // Check if kode_asset is provided, if not generate new one
+            if (!empty($data['kode_asset'])) {
+                // Check if asset with this code already exists
+                $existingAsset = Asset::where('kode_asset', $data['kode_asset'])->first();
+                if ($existingAsset) {
+                    continue;
+                }
+                $kodeAsset = $data['kode_asset'];
+            } else {
+                $kodeAsset = $this->codeGenerator->generate($category);
+            }
+
+            // Normalize kondisi and status
+            $kondisi = !empty($data['kondisi']) ? strtolower(trim($data['kondisi'])) : 'baik';
+            $kondisi = $this->normalizeKondisi($kondisi);
+
+            $status = !empty($data['status']) ? strtolower(trim($data['status'])) : 'available';
+            $status = $this->normalizeStatus($status);
+
+            // Create asset
+            $asset = Asset::create([
+                'kode_asset' => $kodeAsset,
+                'nama_asset' => $data['nama_asset'],
+                'category_id' => $category->id,
+                'serial_number' => $data['serial_number'] ?? null,
+                'merk' => $data['merk'] ?? null,
+                'model' => $data['model'] ?? null,
+                'kondisi' => $kondisi,
+                'status' => $status,
+                'lokasi' => $data['lokasi'] ?? null,
+                'deskripsi' => $data['deskripsi'] ?? null,
+            ]);
+
+            // Generate QR Code for the asset
+            $qrPath = $this->qrCodeService->generate($asset);
+            $asset->update(['qr_code' => $qrPath]);
         }
-
-        // Normalize kondisi and status
-        $kondisi = !empty($data['kondisi']) ? strtolower(trim($data['kondisi'])) : 'baik';
-        $kondisi = $this->normalizeKondisi($kondisi);
-        
-        $status = !empty($data['status']) ? strtolower(trim($data['status'])) : 'available';
-        $status = $this->normalizeStatus($status);
-
-        return new Asset([
-            'kode_asset' => $kodeAsset,
-            'nama_asset' => $data['nama_asset'],
-            'category_id' => $category->id,
-            'serial_number' => $data['serial_number'] ?? null,
-            'merk' => $data['merk'] ?? null,
-            'model' => $data['model'] ?? null,
-            'kondisi' => $kondisi,
-            'status' => $status,
-            'lokasi' => $data['lokasi'] ?? null,
-            'deskripsi' => $data['deskripsi'] ?? null,
-        ]);
     }
 
     /**
@@ -137,7 +150,6 @@ class AssetsImport implements ToModel, WithHeadingRow
 
     /**
      * Normalize kondisi value to match ENUM in database
-     * Valid: baik, cukup, rusak_ringan, rusak_berat
      */
     private function normalizeKondisi(string $kondisi): string
     {
@@ -147,17 +159,17 @@ class AssetsImport implements ToModel, WithHeadingRow
             'good' => 'baik',
             'baru' => 'baik',
             'new' => 'baik',
-            
+
             'cukup' => 'cukup',
             'sedang' => 'cukup',
             'fair' => 'cukup',
             'normal' => 'cukup',
-            
+
             'rusak_ringan' => 'rusak_ringan',
             'rusak ringan' => 'rusak_ringan',
             'minor' => 'rusak_ringan',
             'rusak' => 'rusak_ringan',
-            
+
             'rusak_berat' => 'rusak_berat',
             'rusak berat' => 'rusak_berat',
             'major' => 'rusak_berat',
@@ -170,7 +182,6 @@ class AssetsImport implements ToModel, WithHeadingRow
 
     /**
      * Normalize status value to match ENUM in database
-     * Valid: available, borrowed, maintenance, broken, lost
      */
     private function normalizeStatus(string $status): string
     {
@@ -180,27 +191,26 @@ class AssetsImport implements ToModel, WithHeadingRow
             'aktif' => 'available',
             'active' => 'available',
             'ready' => 'available',
-            
+
             'borrowed' => 'borrowed',
             'dipinjam' => 'borrowed',
             'pinjam' => 'borrowed',
             'in use' => 'borrowed',
             'inuse' => 'borrowed',
-            
+
             'maintenance' => 'maintenance',
             'perbaikan' => 'maintenance',
             'repair' => 'maintenance',
             'service' => 'maintenance',
-            
+
             'broken' => 'broken',
             'rusak' => 'broken',
             'damaged' => 'broken',
-            
+
             'lost' => 'lost',
             'hilang' => 'lost',
             'missing' => 'lost',
-            
-            // Non-standard values
+
             'retired' => 'maintenance',
             'disposed' => 'lost',
             'scrap' => 'broken',
@@ -211,5 +221,4 @@ class AssetsImport implements ToModel, WithHeadingRow
 
         return $mapping[$status] ?? 'available';
     }
-
 }
