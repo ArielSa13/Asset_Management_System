@@ -8,130 +8,52 @@ use Illuminate\Support\Str;
 class CategoryDetectorService
 {
     /**
-     * Category keywords mapping
-     * Format: 'keyword' => 'category_prefix'
-     */
-    private array $categoryKeywords = [
-        // Komputer & Laptop
-        'laptop' => ['KOM', 'LAP', 'LAPTOP', 'KOMPUTER'],
-        'notebook' => ['KOM', 'LAP', 'LAPTOP', 'KOMPUTER'],
-        'computer' => ['KOM', 'LAP', 'LAPTOP', 'KOMPUTER'],
-        'pc' => ['KOM', 'LAP', 'LAPTOP', 'KOMPUTER'],
-        'macbook' => ['KOM', 'LAP', 'LAPTOP', 'KOMPUTER'],
-        
-        // Printer & Scanner
-        'printer' => ['PRT', 'PRINTER'],
-        'scanner' => ['SCN', 'SCANNER', 'SCAN'],
-        'fotocopy' => ['PRT', 'PRINTER'],
-        'fotokopi' => ['PRT', 'PRINTER'],
-        
-        // Monitor & Display
-        'monitor' => ['MON', 'MONITOR'],
-        'display' => ['MON', 'MONITOR'],
-        'lcd' => ['MON', 'MONITOR'],
-        'led' => ['MON', 'MONITOR'],
-        'screen' => ['MON', 'MONITOR'],
-        
-        // Keyboard & Mouse
-        'keyboard' => ['PER', 'PERIPHERALS', 'KEYBOARD'],
-        'mouse' => ['PER', 'PERIPHERALS', 'MOUSE'],
-        'mice' => ['PER', 'PERIPHERALS', 'MOUSE'],
-        
-        // Headset & Audio
-        'headset' => ['AUD', 'AUDIO', 'HEADSET'],
-        'headphone' => ['AUD', 'AUDIO', 'HEADSET'],
-        'speaker' => ['AUD', 'AUDIO', 'SPEAKER'],
-        'microphone' => ['AUD', 'AUDIO', 'MIC'],
-        'mic' => ['AUD', 'AUDIO', 'MIC'],
-        
-        // Networking
-        'router' => ['NET', 'NETWORK', 'ROUTER'],
-        'switch' => ['NET', 'NETWORK', 'SWITCH'],
-        'modem' => ['NET', 'NETWORK', 'MODEM'],
-        'access point' => ['NET', 'NETWORK', 'AP'],
-        'wifi' => ['NET', 'NETWORK'],
-        
-        // Storage & USB
-        'flashdisk' => ['STR', 'STORAGE', 'USB'],
-        'flash disk' => ['STR', 'STORAGE', 'USB'],
-        'usb' => ['STR', 'STORAGE', 'USB'],
-        'harddisk' => ['STR', 'STORAGE', 'HDD'],
-        'hard disk' => ['STR', 'STORAGE', 'HDD'],
-        'ssd' => ['STR', 'STORAGE', 'SSD'],
-        'external' => ['STR', 'STORAGE'],
-        
-        // Charger & Adapter
-        'charger' => ['ADP', 'ADAPTER', 'CHARGER'],
-        'adapter' => ['ADP', 'ADAPTER'],
-        'power supply' => ['ADP', 'ADAPTER', 'PSU'],
-        'psu' => ['ADP', 'ADAPTER', 'PSU'],
-        
-        // Kabel & Connector
-        'cable' => ['CBL', 'CABLE', 'KABEL'],
-        'kabel' => ['CBL', 'CABLE', 'KABEL'],
-        'hdmi' => ['CBL', 'CABLE', 'KABEL'],
-        'vga' => ['CBL', 'CABLE', 'KABEL'],
-        
-        // Projector
-        'projector' => ['PRJ', 'PROJECTOR'],
-        'proyektor' => ['PRJ', 'PROJECTOR'],
-        
-        // Webcam & Camera
-        'webcam' => ['CAM', 'CAMERA', 'WEBCAM'],
-        'camera' => ['CAM', 'CAMERA'],
-        'kamera' => ['CAM', 'CAMERA'],
-        
-        // Server & Rack
-        'server' => ['SRV', 'SERVER'],
-        'rack' => ['RCK', 'RACK'],
-        
-        // Meja & Furniture
-        'meja' => ['FRN', 'FURNITURE', 'MEJA'],
-        'kursi' => ['FRN', 'FURNITURE', 'KURSI'],
-        'table' => ['FRN', 'FURNITURE', 'MEJA'],
-        'chair' => ['FRN', 'FURNITURE', 'KURSI'],
-        'lemari' => ['FRN', 'FURNITURE', 'LEMARI'],
-        
-        // AC & Cooling
-        'ac' => ['AC', 'COOLING'],
-        'air conditioner' => ['AC', 'COOLING'],
-        'fan' => ['FAN', 'COOLING'],
-        'kipas' => ['FAN', 'COOLING'],
-        
-        // UPS
-        'ups' => ['UPS'],
-        
-        // Telepon
-        'phone' => ['PHN', 'PHONE', 'TELEPON'],
-        'telephone' => ['PHN', 'PHONE', 'TELEPON'],
-        'telepon' => ['PHN', 'PHONE', 'TELEPON'],
-    ];
-
-    /**
-     * Detect category from asset name
-     * Falls back to "Perangkat Lainnya" if no keyword matches
+     * Detect category from asset name using Category description keywords.
+     * 
+     * How it works:
+     * - Each Category has a 'description' field that contains keywords (comma-separated)
+     * - Example: Category "Peripherals" has description: "keyboard, headphone, microphone, mouse"
+     * - When importing "Keyboard Logitech G Pro", it matches "keyboard" → Peripherals
+     * 
+     * Falls back to "Perangkat Lainnya" if no keyword matches.
      */
     public function detectCategory(string $assetName): ?Category
     {
         $assetNameLower = Str::lower($assetName);
-        
-        // Try to match keywords
-        foreach ($this->categoryKeywords as $keyword => $possiblePrefixes) {
-            if (Str::contains($assetNameLower, $keyword)) {
-                // Try to find category by these prefixes
-                foreach ($possiblePrefixes as $prefix) {
-                    $category = Category::where('prefix', $prefix)
-                        ->orWhere('name', 'LIKE', "%{$prefix}%")
-                        ->active()
-                        ->first();
-                    
-                    if ($category) {
-                        return $category;
-                    }
+
+        // Get all active categories with their descriptions
+        $categories = Category::active()->get();
+
+        foreach ($categories as $category) {
+            // Skip categories without description
+            if (empty($category->description)) {
+                continue;
+            }
+
+            // Parse keywords from description (comma-separated)
+            $keywords = array_map('trim', explode(',', strtolower($category->description)));
+
+            foreach ($keywords as $keyword) {
+                if (empty($keyword)) continue;
+                
+                // Check if asset name contains this keyword
+                if (Str::contains($assetNameLower, $keyword)) {
+                    return $category;
                 }
             }
         }
-        
+
+        // Also try matching by category name or prefix directly
+        foreach ($categories as $category) {
+            $categoryNameLower = Str::lower($category->name);
+            $prefixLower = Str::lower($category->prefix);
+            
+            if (Str::contains($assetNameLower, $categoryNameLower) || 
+                Str::contains($assetNameLower, $prefixLower)) {
+                return $category;
+            }
+        }
+
         // Fallback: assign to "Perangkat Lainnya" category
         return $this->getFallbackCategory();
     }
@@ -160,29 +82,5 @@ class CategoryDetectorService
             'description' => 'Kategori untuk asset yang tidak terdeteksi secara otomatis',
             'is_active' => true,
         ]);
-    }
-
-    /**
-     * Get suggested category name from asset name (for creating new category)
-     */
-    public function suggestCategoryName(string $assetName): ?string
-    {
-        $assetNameLower = Str::lower($assetName);
-        
-        foreach ($this->categoryKeywords as $keyword => $possiblePrefixes) {
-            if (Str::contains($assetNameLower, $keyword)) {
-                return strtoupper($keyword);
-            }
-        }
-        
-        return null;
-    }
-
-    /**
-     * Get all keyword mappings for reference
-     */
-    public function getKeywordMappings(): array
-    {
-        return $this->categoryKeywords;
     }
 }
