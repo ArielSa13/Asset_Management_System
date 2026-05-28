@@ -20,7 +20,7 @@ class StoreBorrowingRequest extends FormRequest
             'borrower_phone' => ['required', 'string', 'max:20'],
             'purpose' => ['required', 'string', 'max:1000'],
             'borrow_date' => ['required', 'date', 'after_or_equal:today'],
-            'return_date' => ['required', 'date', 'after:borrow_date'],
+            'return_date' => ['nullable', 'date', 'after:borrow_date'],
         ];
     }
 
@@ -34,7 +34,6 @@ class StoreBorrowingRequest extends FormRequest
             'purpose.required' => 'Tujuan peminjaman wajib diisi.',
             'borrow_date.required' => 'Tanggal pinjam wajib diisi.',
             'borrow_date.after_or_equal' => 'Tanggal pinjam tidak boleh sebelum hari ini.',
-            'return_date.required' => 'Tanggal kembali wajib diisi.',
             'return_date.after' => 'Tanggal kembali harus setelah tanggal pinjam.',
         ];
     }

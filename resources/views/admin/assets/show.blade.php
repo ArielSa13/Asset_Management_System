@@ -98,7 +98,7 @@
                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $borrowing->borrower_name }}</span>
                             <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $borrowing->status_badge }}">{{ $borrowing->status_label }}</span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date->format('d M Y') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date ? $borrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                     </div>
                     @endforeach
                 </div>
@@ -162,7 +162,7 @@
                 <div class="space-y-2">
                     <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Name:</span> {{ $asset->activeBorrowing->borrower_name }}</p>
                     <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Email:</span> {{ $asset->activeBorrowing->borrower_email }}</p>
-                    <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Return:</span> {{ $asset->activeBorrowing->return_date->format('d M Y') }}</p>
+                    <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Return:</span> {{ $asset->activeBorrowing->return_date ? $asset->activeBorrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                     <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $asset->activeBorrowing->status_badge }}">{{ $asset->activeBorrowing->status_label }}</span>
                 </div>
             </div>

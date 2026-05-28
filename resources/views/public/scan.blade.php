@@ -75,7 +75,7 @@
                 <div class="mt-4 p-4 bg-yellow-50 rounded-xl border border-yellow-100">
                     <h3 class="text-sm font-semibold text-yellow-800 mb-2">Currently Borrowed</h3>
                     <p class="text-sm text-yellow-700">By: {{ $asset->activeBorrowing->borrower_name }}</p>
-                    <p class="text-xs text-yellow-600">Return date: {{ $asset->activeBorrowing->return_date->format('d M Y') }}</p>
+                    <p class="text-xs text-yellow-600">Return date: {{ $asset->activeBorrowing->return_date ? $asset->activeBorrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                 </div>
                 @endif
             </div>
@@ -138,8 +138,8 @@
                             @error('borrow_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Return Date *</label>
-                            <input type="date" name="return_date" value="{{ old('return_date') }}" required class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Return Date <span class="text-gray-400 text-xs">(optional)</span></label>
+                            <input type="date" name="return_date" value="{{ old('return_date') }}" class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500">
                             @error('return_date') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
                         </div>
                     </div>

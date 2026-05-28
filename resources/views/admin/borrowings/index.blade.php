@@ -53,7 +53,7 @@
                         </td>
                         <td class="px-6 py-4 text-gray-700 dark:text-gray-300">
                             <p class="text-xs">{{ $borrowing->borrow_date->format('d M Y') }}</p>
-                            <p class="text-xs">to {{ $borrowing->return_date->format('d M Y') }}</p>
+                            <p class="text-xs">to {{ $borrowing->return_date ? $borrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                         </td>
                         <td class="px-6 py-4">
                             <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $borrowing->status_badge }}">{{ $borrowing->status_label }}</span>

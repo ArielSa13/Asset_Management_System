@@ -28,7 +28,7 @@
                 <div><dt class="text-xs text-gray-500 uppercase">Asset Code</dt><dd class="text-sm font-mono font-semibold text-primary-600">{{ $borrowing->asset?->kode_asset }}</dd></div>
                 <div><dt class="text-xs text-gray-500 uppercase">Asset Name</dt><dd class="text-sm text-gray-700 dark:text-gray-300">{{ $borrowing->asset?->nama_asset }}</dd></div>
                 <div><dt class="text-xs text-gray-500 uppercase">Category</dt><dd class="text-sm text-gray-700 dark:text-gray-300">{{ $borrowing->asset?->category?->name }}</dd></div>
-                <div><dt class="text-xs text-gray-500 uppercase">Borrow Period</dt><dd class="text-sm text-gray-700 dark:text-gray-300">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date->format('d M Y') }}</dd></div>
+                <div><dt class="text-xs text-gray-500 uppercase">Borrow Period</dt><dd class="text-sm text-gray-700 dark:text-gray-300">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date ? $borrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</dd></div>
                 @if($borrowing->actual_return_date)
                 <div><dt class="text-xs text-gray-500 uppercase">Returned On</dt><dd class="text-sm text-gray-700 dark:text-gray-300">{{ $borrowing->actual_return_date->format('d M Y') }}</dd></div>
                 @endif
