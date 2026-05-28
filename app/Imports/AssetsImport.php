@@ -28,7 +28,24 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
             return null;
         }
 
-        $kodeAsset = $this->codeGenerator->generate($category);
+        // Check if kode_asset is provided, if not generate new one
+        if (!empty($row['kode_asset'])) {
+            // Check if asset with this code already exists
+            $existingAsset = Asset::where('kode_asset', $row['kode_asset'])->first();
+            if ($existingAsset) {
+                // Skip this row if asset code already exists
+                return null;
+            }
+            $kodeAsset = $row['kode_asset'];
+        } else {
+            $kodeAsset = $this->codeGenerator->generate($category);
+        }
+
+        // Normalize kondisi to lowercase
+        $kondisi = !empty($row['kondisi']) ? strtolower(trim($row['kondisi'])) : 'baik';
+        
+        // Normalize status to lowercase
+        $status = !empty($row['status']) ? strtolower(trim($row['status'])) : 'available';
 
         return new Asset([
             'kode_asset' => $kodeAsset,
@@ -37,8 +54,8 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
             'serial_number' => $row['serial_number'] ?? null,
             'merk' => $row['merk'] ?? null,
             'model' => $row['model'] ?? null,
-            'kondisi' => $row['kondisi'] ?? 'baik',
-            'status' => 'available',
+            'kondisi' => $kondisi,
+            'status' => $status,
             'lokasi' => $row['lokasi'] ?? null,
             'deskripsi' => $row['deskripsi'] ?? null,
         ]);

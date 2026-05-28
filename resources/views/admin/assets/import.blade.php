@@ -27,6 +27,7 @@
                 <ol class="list-decimal list-inside space-y-2 text-sm text-blue-800 dark:text-blue-300">
                     <li>Download the template Excel file below</li>
                     <li>Fill in the asset data according to the template format</li>
+                    <li><strong>Asset Code (kode_asset):</strong> Leave empty for auto-generate, or fill with existing code for migrating old data</li>
                     <li>Upload the completed file using the form below</li>
                     <li>Wait for the import process to complete</li>
                 </ol>
@@ -84,8 +85,8 @@
                     <span>Required: nama_asset, kategori</span>
                 </li>
                 <li class="flex items-start gap-2">
-                    <svg class="w-4 h-4 text-green-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                    <span>Asset codes will be auto-generated</span>
+                    <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <span><strong>kode_asset:</strong> Optional - leave empty for auto-generate</span>
                 </li>
             </ul>
         </div>

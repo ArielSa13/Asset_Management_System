@@ -109,35 +109,41 @@ class AssetController extends Controller
     {
         $headers = [
             'nama_asset',
+            'kode_asset',
             'kategori',
             'merk',
             'model',
             'serial_number',
-            'lokasi',
             'kondisi',
+            'status',
+            'lokasi',
             'deskripsi'
         ];
 
         $exampleData = [
             [
                 'nama_asset' => 'Laptop Dell Latitude 5520',
+                'kode_asset' => '',  // Leave empty for auto-generate
                 'kategori' => 'KOMPUTER',
                 'merk' => 'Dell',
                 'model' => 'Latitude 5520',
                 'serial_number' => 'SN123456789',
-                'lokasi' => 'Room 101, Floor 2',
                 'kondisi' => 'baik',
+                'status' => 'available',
+                'lokasi' => 'Room 101, Floor 2',
                 'deskripsi' => 'Laptop untuk staff IT'
             ],
             [
-                'nama_asset' => 'Mouse Logitech MX Master',
-                'kategori' => 'PERIPHERALS',
-                'merk' => 'Logitech',
-                'model' => 'MX Master 3',
-                'serial_number' => 'SN987654321',
-                'lokasi' => 'Room 102, Floor 2',
+                'nama_asset' => 'ADAPTER NOTEBOOK',
+                'kode_asset' => 'ADP0001061',  // Can provide existing code
+                'kategori' => 'ADAPTER',
+                'merk' => 'HP',
+                'model' => 'PPP009D',
+                'serial_number' => 'WEBPE0BAR9T94L',
                 'kondisi' => 'baik',
-                'deskripsi' => 'Mouse wireless untuk staff'
+                'status' => 'available',
+                'lokasi' => 'data warehouse',
+                'deskripsi' => 'Adapter untuk notebook HP'
             ]
         ];
 
@@ -168,7 +174,7 @@ class AssetController extends Controller
         }
 
         // Auto size columns
-        foreach (range('A', 'H') as $col) {
+        foreach (range('A', 'J') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
         }
 
@@ -185,18 +191,25 @@ class AssetController extends Controller
             ['- kategori', 'Category name or prefix (required)'],
             ['', ''],
             ['Optional Fields:', ''],
+            ['- kode_asset', 'Asset code (leave EMPTY for auto-generate, or fill with existing code)'],
             ['- merk', 'Brand name'],
             ['- model', 'Model name'],
             ['- serial_number', 'Serial number'],
-            ['- lokasi', 'Location (free text)'],
             ['- kondisi', 'Condition: baik, cukup, rusak_ringan, rusak_berat'],
+            ['- status', 'Status: available, maintenance, broken, lost'],
+            ['- lokasi', 'Location (free text)'],
             ['- deskripsi', 'Description'],
             ['', ''],
-            ['Notes:', ''],
-            ['1. Asset code (kode_asset) will be auto-generated'],
-            ['2. Status will be set to "available" by default'],
-            ['3. Make sure category exists in the system'],
-            ['4. Remove example data before uploading'],
+            ['IMPORTANT NOTES:', ''],
+            ['1. kode_asset:', ''],
+            ['   - Leave EMPTY: System will auto-generate new code'],
+            ['   - Fill with code: Use existing asset code (for migrating old data)'],
+            ['   - If code exists: Row will be skipped to prevent duplicates'],
+            ['', ''],
+            ['2. Category must exist in the system before importing'],
+            ['3. kondisi will default to "baik" if not specified'],
+            ['4. status will default to "available" if not specified'],
+            ['5. Remove example data before uploading your file'],
         ];
 
         $row = 2;
@@ -208,8 +221,8 @@ class AssetController extends Controller
             $row++;
         }
 
-        $notesSheet->getColumnDimension('A')->setWidth(20);
-        $notesSheet->getColumnDimension('B')->setWidth(50);
+        $notesSheet->getColumnDimension('A')->setWidth(25);
+        $notesSheet->getColumnDimension('B')->setWidth(60);
 
         $writer = new \PhpOffice\PhpSpreadsheet\Writer\Xlsx($spreadsheet);
         
