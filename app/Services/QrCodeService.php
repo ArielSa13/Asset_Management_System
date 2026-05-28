@@ -9,12 +9,12 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class QrCodeService
 {
     /**
-     * Generate QR code for an asset.
+     * Generate QR code for an asset (SVG format - no imagick needed).
      */
     public function generate(Asset $asset): string
     {
         $url = url("/scan/{$asset->kode_asset}");
-        $filename = "qrcodes/{$asset->kode_asset}.png";
+        $filename = "qrcodes/{$asset->kode_asset}.svg";
         $path = storage_path("app/public/{$filename}");
 
         // Ensure directory exists
@@ -23,12 +23,14 @@ class QrCodeService
             mkdir($dir, 0755, true);
         }
 
-        // Generate QR code
-        QrCode::format('png')
+        // Generate QR code as SVG (no imagick extension needed)
+        $svg = QrCode::format('svg')
             ->size(config('app.qr_code_size', 300))
             ->errorCorrection('H')
             ->margin(1)
-            ->generate($url, $path);
+            ->generate($url);
+
+        file_put_contents($path, $svg);
 
         return $filename;
     }
