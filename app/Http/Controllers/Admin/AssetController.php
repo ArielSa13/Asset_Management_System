@@ -25,7 +25,7 @@ class AssetController extends Controller
             ->filterStatus($request->status)
             ->filterCategory($request->category_id ? (int) $request->category_id : null)
             ->filterKondisi($request->kondisi)
-            ->orderByDesc('created_at')
+            ->orderBy('kode_asset', 'asc')
             ->paginate(15)
             ->withQueryString();
 
