@@ -8,9 +8,8 @@ use App\Services\AssetCodeGeneratorService;
 use App\Services\CategoryDetectorService;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithValidation;
 
-class AssetsImport implements ToModel, WithHeadingRow, WithValidation
+class AssetsImport implements ToModel, WithHeadingRow
 {
     private AssetCodeGeneratorService $codeGenerator;
     private CategoryDetectorService $categoryDetector;
@@ -23,18 +22,26 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
 
     public function model(array $row)
     {
+        // Map flexible column names to standard fields
+        $data = $this->mapColumns($row);
+
+        // Skip empty rows
+        if (empty($data['nama_asset'])) {
+            return null;
+        }
+
         // Try to get category from kategori column first
         $category = null;
         
-        if (!empty($row['kategori'])) {
-            $category = Category::where('name', $row['kategori'])
-                ->orWhere('prefix', strtoupper($row['kategori'] ?? ''))
+        if (!empty($data['kategori'])) {
+            $category = Category::where('name', $data['kategori'])
+                ->orWhere('prefix', strtoupper($data['kategori']))
                 ->first();
         }
         
         // If category not found or empty, try auto-detect from nama_asset
-        if (!$category && !empty($row['nama_asset'])) {
-            $category = $this->categoryDetector->detectCategory($row['nama_asset']);
+        if (!$category) {
+            $category = $this->categoryDetector->detectCategory($data['nama_asset']);
         }
 
         // If still no category found, skip this row
@@ -43,38 +50,89 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
         }
 
         // Check if kode_asset is provided, if not generate new one
-        if (!empty($row['kode_asset'])) {
+        if (!empty($data['kode_asset'])) {
             // Check if asset with this code already exists
-            $existingAsset = Asset::where('kode_asset', $row['kode_asset'])->first();
+            $existingAsset = Asset::where('kode_asset', $data['kode_asset'])->first();
             if ($existingAsset) {
-                // Skip this row if asset code already exists
                 return null;
             }
-            $kodeAsset = $row['kode_asset'];
+            $kodeAsset = $data['kode_asset'];
         } else {
             $kodeAsset = $this->codeGenerator->generate($category);
         }
 
-        // Normalize kondisi to lowercase and map non-standard values
-        $kondisi = !empty($row['kondisi']) ? strtolower(trim($row['kondisi'])) : 'baik';
+        // Normalize kondisi and status
+        $kondisi = !empty($data['kondisi']) ? strtolower(trim($data['kondisi'])) : 'baik';
         $kondisi = $this->normalizeKondisi($kondisi);
         
-        // Normalize status to lowercase and map non-standard values
-        $status = !empty($row['status']) ? strtolower(trim($row['status'])) : 'available';
+        $status = !empty($data['status']) ? strtolower(trim($data['status'])) : 'available';
         $status = $this->normalizeStatus($status);
 
         return new Asset([
             'kode_asset' => $kodeAsset,
-            'nama_asset' => $row['nama_asset'],
+            'nama_asset' => $data['nama_asset'],
             'category_id' => $category->id,
-            'serial_number' => $row['serial_number'] ?? null,
-            'merk' => $row['merk'] ?? null,
-            'model' => $row['model'] ?? null,
+            'serial_number' => $data['serial_number'] ?? null,
+            'merk' => $data['merk'] ?? null,
+            'model' => $data['model'] ?? null,
             'kondisi' => $kondisi,
             'status' => $status,
-            'lokasi' => $row['lokasi'] ?? null,
-            'deskripsi' => $row['deskripsi'] ?? null,
+            'lokasi' => $data['lokasi'] ?? null,
+            'deskripsi' => $data['deskripsi'] ?? null,
         ]);
+    }
+
+    /**
+     * Map flexible column names to standard field names
+     * Supports multiple header formats
+     */
+    private function mapColumns(array $row): array
+    {
+        return [
+            'nama_asset' => $this->getColumnValue($row, [
+                'nama_asset', 'nama', 'name', 'asset_name', 'nama_aset',
+            ]),
+            'kode_asset' => $this->getColumnValue($row, [
+                'kode_asset', 'kode', 'code', 'asset_code', 'kode_aset',
+            ]),
+            'kategori' => $this->getColumnValue($row, [
+                'kategori', 'category', 'kategory', 'cat', 'jenis',
+            ]),
+            'merk' => $this->getColumnValue($row, [
+                'merk', 'merek', 'brand', 'merek_brand', 'merekbrand',
+            ]),
+            'model' => $this->getColumnValue($row, [
+                'model', 'tipe', 'type', 'model_tipe', 'modeltipe',
+            ]),
+            'serial_number' => $this->getColumnValue($row, [
+                'serial_number', 'serial', 'sn', 'serialnumber',
+            ]),
+            'kondisi' => $this->getColumnValue($row, [
+                'kondisi', 'condition', 'kondisi_asset',
+            ]),
+            'status' => $this->getColumnValue($row, [
+                'status', 'stat', 'status_asset',
+            ]),
+            'lokasi' => $this->getColumnValue($row, [
+                'lokasi', 'location', 'loc', 'tempat', 'ruangan',
+            ]),
+            'deskripsi' => $this->getColumnValue($row, [
+                'deskripsi', 'description', 'desc', 'keterangan', 'note', 'notes',
+            ]),
+        ];
+    }
+
+    /**
+     * Get value from row by trying multiple possible column names
+     */
+    private function getColumnValue(array $row, array $possibleKeys): ?string
+    {
+        foreach ($possibleKeys as $key) {
+            if (isset($row[$key]) && $row[$key] !== null && $row[$key] !== '') {
+                return trim((string) $row[$key]);
+            }
+        }
+        return null;
     }
 
     /**
@@ -154,11 +212,4 @@ class AssetsImport implements ToModel, WithHeadingRow, WithValidation
         return $mapping[$status] ?? 'available';
     }
 
-    public function rules(): array
-    {
-        return [
-            'nama_asset' => ['required', 'string'],
-            // kategori is now optional since we have auto-detection
-        ];
-    }
 }
