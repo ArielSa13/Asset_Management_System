@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\BorrowingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
-use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Public\ScanController;
@@ -58,9 +57,6 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Categories
     Route::resource('categories', CategoryController::class)->except(['show']);
-
-    // Locations
-    Route::resource('locations', LocationController::class)->except(['show']);
 
     // Borrowings
     Route::get('borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
