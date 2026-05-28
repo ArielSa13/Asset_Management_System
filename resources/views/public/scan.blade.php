@@ -60,7 +60,7 @@
                     </div>
                     <div class="flex justify-between py-2 border-b border-gray-100">
                         <span class="text-sm text-gray-500">Location</span>
-                        <span class="text-sm font-medium text-gray-900">{{ $asset->location?->full_location ?? $asset->lokasi ?? '-' }}</span>
+                        <span class="text-sm font-medium text-gray-900">{{ $asset->lokasi ?? '-' }}</span>
                     </div>
                     @if($asset->merk)
                     <div class="flex justify-between py-2 border-b border-gray-100">

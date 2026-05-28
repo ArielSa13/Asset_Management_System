@@ -20,7 +20,7 @@ class AssetController extends Controller
 
     public function index(Request $request)
     {
-        $assets = Asset::with(['category', 'location'])
+        $assets = Asset::with(['category'])
             ->search($request->search)
             ->filterStatus($request->status)
             ->filterCategory($request->category_id ? (int) $request->category_id : null)
@@ -57,7 +57,7 @@ class AssetController extends Controller
 
     public function show(Asset $asset)
     {
-        $asset->load(['category', 'location', 'borrowings' => function ($q) {
+        $asset->load(['category', 'borrowings' => function ($q) {
             $q->orderByDesc('created_at')->limit(10);
         }, 'histories' => function ($q) {
             $q->orderByDesc('created_at')->limit(20);

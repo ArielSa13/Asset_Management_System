@@ -37,7 +37,7 @@
                 <td>{{ $asset->category?->name }}</td>
                 <td>{{ $asset->status_label }}</td>
                 <td>{{ $asset->kondisi_label }}</td>
-                <td>{{ $asset->lokasi ?? $asset->location?->name }}</td>
+                <td>{{ $asset->lokasi ?? '-' }}</td>
                 <td class="text-right">{{ $asset->harga ? 'Rp ' . number_format($asset->harga, 0, ',', '.') : '-' }}</td>
             </tr>
             @endforeach

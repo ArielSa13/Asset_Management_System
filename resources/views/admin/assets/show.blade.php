@@ -60,7 +60,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Location</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $asset->location?->full_location ?? $asset->lokasi ?? '-' }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $asset->lokasi ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Purchase Date</dt>
