@@ -10,6 +10,12 @@ class Asset extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = [
+        'status_label',
+        'status_badge',
+        'kondisi_label',
+    ];
+
     protected $fillable = [
         'kode_asset',
         'nama_asset',

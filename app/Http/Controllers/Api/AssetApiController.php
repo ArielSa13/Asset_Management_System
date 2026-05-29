@@ -56,9 +56,13 @@ class AssetApiController extends Controller
             ], 404);
         }
 
+        $data = $asset->toArray();
+        $data['category'] = $asset->category?->name;
+        $data['borrower'] = $asset->activeBorrowing?->borrower_name;
+
         return response()->json([
             'success' => true,
-            'data' => $asset,
+            'data' => $data,
         ]);
     }
 }
