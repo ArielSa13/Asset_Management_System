@@ -23,6 +23,10 @@ class StoreAssetRequest extends FormRequest
             'status' => ['required', 'in:available,borrowed,maintenance,broken,lost'],
             'lokasi' => ['nullable', 'string', 'max:255'],
             'deskripsi' => ['nullable', 'string'],
+            'foto_asset' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
+            'tanggal_pembelian' => ['nullable', 'date'],
+            'harga' => ['nullable', 'numeric', 'min:0'],
+            'supplier' => ['nullable', 'string', 'max:255'],
         ];
     }
 

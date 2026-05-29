@@ -18,7 +18,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // QR Code Scan - Public Access (No Login Required)
-Route::get('/scan/{kode}', [ScanController::class, 'show'])->name('scan.show');
+Route::get('/scan/{kode}', [ScanController::class, 'show'])
+    ->name('scan.show')
+    ->middleware('throttle:30,1'); // Rate limiting: 30 requests per minute
 Route::post('/scan/borrow', [ScanController::class, 'requestBorrow'])
     ->name('scan.borrow')
     ->middleware('throttle:5,1'); // Rate limiting: 5 requests per minute
