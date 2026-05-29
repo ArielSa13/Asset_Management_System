@@ -56,6 +56,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Assets
     Route::resource('assets', AssetController::class);
     Route::post('assets/{asset}/regenerate-qr', [AssetController::class, 'regenerateQr'])->name('assets.regenerate-qr');
+    Route::get('assets-preview-code/{category}', [AssetController::class, 'previewCode'])->name('assets.preview-code');
     Route::get('assets-import', [AssetController::class, 'showImport'])->name('assets.import');
     Route::get('assets-template', [AssetController::class, 'downloadTemplate'])->name('assets.download-template');
 

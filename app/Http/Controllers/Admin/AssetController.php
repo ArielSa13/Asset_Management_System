@@ -8,6 +8,7 @@ use App\Http\Requests\Asset\UpdateAssetRequest;
 use App\Models\Asset;
 use App\Models\Category;
 use App\Services\AssetService;
+use App\Services\AssetCodeGeneratorService;
 use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 
@@ -262,3 +263,17 @@ class AssetController extends Controller
         return response()->download($temp_file, $fileName)->deleteFileAfterSend(true);
     }
 }
+
+
+    public function previewCode(Category $category)
+    {
+        $codeGenerator = app(AssetCodeGeneratorService::class);
+        $nextCode = $codeGenerator->preview($category);
+        
+        return response()->json([
+            'success' => true,
+            'code' => $nextCode,
+            'prefix' => $category->prefix,
+            'category' => $category->name
+        ]);
+    }

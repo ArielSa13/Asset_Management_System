@@ -14,6 +14,22 @@
     <div class="mb-6">
         <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Add New Asset</h2>
         <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Asset code will be generated automatically based on category.</p>
+        
+        <!-- Asset Code Preview -->
+        <div id="assetCodePreview" class="mt-4 hidden">
+            <div class="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border-2 border-blue-200 dark:border-blue-700 rounded-xl">
+                <svg class="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
+                </svg>
+                <div>
+                    <p class="text-xs font-medium text-blue-600 dark:text-blue-400">Next Asset Code</p>
+                    <p id="assetCodeValue" class="text-lg font-bold text-blue-900 dark:text-blue-100 font-mono tracking-wider">-</p>
+                </div>
+                <div class="ml-2 px-2 py-1 bg-blue-100 dark:bg-blue-800 rounded-md">
+                    <p class="text-xs text-blue-700 dark:text-blue-300">Auto-generated</p>
+                </div>
+            </div>
+        </div>
     </div>
 
     <form action="{{ route('admin.assets.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
@@ -29,7 +45,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Category *</label>
-                    <select name="category_id" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
+                    <select name="category_id" id="categorySelect" required class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-colors">
                         <option value="">Select Category</option>
                         @foreach($categories as $category)
                         <option value="{{ $category->id }}" {{ old('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }} ({{ $category->prefix }})</option>
@@ -107,4 +123,61 @@
         </div>
     </form>
 </div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const categorySelect = document.getElementById('categorySelect');
+    const previewContainer = document.getElementById('assetCodePreview');
+    const codeValueElement = document.getElementById('assetCodeValue');
+    
+    // Load preview on page load if category is already selected (for old() values)
+    if (categorySelect.value) {
+        loadAssetCodePreview(categorySelect.value);
+    }
+    
+    // Update preview when category changes
+    categorySelect.addEventListener('change', function() {
+        if (this.value) {
+            loadAssetCodePreview(this.value);
+        } else {
+            previewContainer.classList.add('hidden');
+        }
+    });
+    
+    function loadAssetCodePreview(categoryId) {
+        // Show loading state
+        previewContainer.classList.remove('hidden');
+        codeValueElement.innerHTML = '<span class="text-blue-400 animate-pulse">Loading...</span>';
+        
+        // Fetch preview code from API
+        fetch(`{{ url('admin/assets-preview-code') }}/${categoryId}`, {
+            method: 'GET',
+            headers: {
+                'Accept': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                codeValueElement.textContent = data.code;
+                
+                // Add animation
+                codeValueElement.classList.add('animate-pulse');
+                setTimeout(() => {
+                    codeValueElement.classList.remove('animate-pulse');
+                }, 500);
+            } else {
+                codeValueElement.textContent = 'Error';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            codeValueElement.textContent = 'Error loading';
+        });
+    }
+});
+</script>
+@endpush
 @endsection
