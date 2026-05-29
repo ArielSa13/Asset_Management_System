@@ -122,8 +122,14 @@ class ExportController extends Controller
             ];
         }
 
-        // Store file temporarily for confirm step
-        $tempPath = $file->store('temp-imports');
+        // Store file temporarily for confirm step with explicit disk
+        $tempPath = $file->store('temp-imports', 'local');
+        
+        // Also store in session as backup (with timestamp for expiry check)
+        session([
+            'import_temp_path' => $tempPath,
+            'import_uploaded_at' => now()->timestamp,
+        ]);
 
         return view('admin.assets.import-preview', compact('preview', 'validCount', 'skipCount', 'tempPath'));
     }
@@ -140,9 +146,42 @@ class ExportController extends Controller
         $tempPath = $request->input('temp_path');
         $fullPath = storage_path("app/{$tempPath}");
 
+        // Try fallback from session if file not found at given path
+        if (!file_exists($fullPath)) {
+            $sessionPath = session('import_temp_path');
+            if ($sessionPath) {
+                $fullPath = storage_path("app/{$sessionPath}");
+                $tempPath = $sessionPath;
+            }
+        }
+
+        // Also check with 'private' disk path
+        if (!file_exists($fullPath)) {
+            $altPath = storage_path("app/private/{$tempPath}");
+            if (file_exists($altPath)) {
+                $fullPath = $altPath;
+            }
+        }
+
+        // Check without "temp-imports/" prefix in case path was stored differently
+        if (!file_exists($fullPath)) {
+            $baseName = basename($tempPath);
+            $searchPaths = [
+                storage_path("app/temp-imports/{$baseName}"),
+                storage_path("app/private/temp-imports/{$baseName}"),
+                storage_path("app/{$baseName}"),
+            ];
+            foreach ($searchPaths as $searchPath) {
+                if (file_exists($searchPath)) {
+                    $fullPath = $searchPath;
+                    break;
+                }
+            }
+        }
+
         if (!file_exists($fullPath)) {
             return redirect()->route('admin.assets.import')
-                ->with('error', 'File sementara sudah expired. Silakan upload ulang.');
+                ->with('error', 'File sementara tidak ditemukan. Kemungkinan sudah expired atau terhapus. Silakan upload ulang.');
         }
 
         $categoryDetector = app(CategoryDetectorService::class);
@@ -216,8 +255,9 @@ class ExportController extends Controller
             $importedCount++;
         }
 
-        // Delete temp file
+        // Delete temp file and clear session
         @unlink($fullPath);
+        session()->forget(['import_temp_path', 'import_uploaded_at']);
 
         return redirect()->route('admin.assets.index')
             ->with('success', "Import selesai! {$importedCount} asset berhasil diimport, {$skippedCount} di-skip.");
