@@ -17,4 +17,5 @@ return [
     // Custom config
     'qr_code_size' => env('QR_CODE_SIZE', 300),
     'qr_code_format' => env('QR_CODE_FORMAT', 'png'),
+    'admin_email' => env('ADMIN_NOTIFICATION_EMAIL', 'admin@assetmanagement.com'),
 ];

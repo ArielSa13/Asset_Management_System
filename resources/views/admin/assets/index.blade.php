@@ -23,7 +23,7 @@
 
     <!-- Filters -->
     <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 p-6">
-        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-4">
             <div>
                 <input type="text" name="search" value="{{ request('search') }}" placeholder="Search assets..." 
                        class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
@@ -53,6 +53,14 @@
                     <option value="cukup" {{ request('kondisi') == 'cukup' ? 'selected' : '' }}>⚠ Cukup</option>
                     <option value="rusak_ringan" {{ request('kondisi') == 'rusak_ringan' ? 'selected' : '' }}>⚡ Rusak Ringan</option>
                     <option value="rusak_berat" {{ request('kondisi') == 'rusak_berat' ? 'selected' : '' }}>✕ Rusak Berat</option>
+                </select>
+            </div>
+            <div>
+                <select name="lokasi" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
+                    <option value="">All Locations</option>
+                    @foreach($locations as $location)
+                    <option value="{{ $location }}" {{ request('lokasi') == $location ? 'selected' : '' }}>{{ $location }}</option>
+                    @endforeach
                 </select>
             </div>
             <div class="flex gap-2">

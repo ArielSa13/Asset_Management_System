@@ -26,13 +26,20 @@ class AssetController extends Controller
             ->filterStatus($request->status)
             ->filterCategory($request->category_id ? (int) $request->category_id : null)
             ->filterKondisi($request->kondisi)
+            ->when($request->lokasi, fn($q, $lokasi) => $q->where('lokasi', $lokasi))
             ->orderBy('kode_asset', 'asc')
             ->paginate(15)
             ->withQueryString();
 
         $categories = Category::active()->get();
+        $locations = Asset::whereNotNull('lokasi')
+            ->where('lokasi', '!=', '')
+            ->distinct()
+            ->pluck('lokasi')
+            ->sort()
+            ->values();
 
-        return view('admin.assets.index', compact('assets', 'categories'));
+        return view('admin.assets.index', compact('assets', 'categories', 'locations'));
     }
 
     public function create()
@@ -99,6 +106,11 @@ class AssetController extends Controller
         $this->qrCodeService->regenerate($asset);
 
         return back()->with('success', 'QR Code berhasil di-regenerate.');
+    }
+
+    public function printLabel(Asset $asset)
+    {
+        return view('admin.assets.print-label', compact('asset'));
     }
 
     public function showImport()
