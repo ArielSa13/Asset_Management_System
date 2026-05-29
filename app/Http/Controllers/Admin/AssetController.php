@@ -152,7 +152,8 @@ class AssetController extends Controller
             'totalScanned' => count($scanData),
         ]);
 
-        return $pdf->download('riwayat-scan-' . now()->format('Y-m-d_His') . '.pdf');
+        // Stream = preview di browser (bisa pilih print atau download)
+        return $pdf->stream('riwayat-scan-' . now()->format('Y-m-d_His') . '.pdf');
     }
 
     public function showImport()
