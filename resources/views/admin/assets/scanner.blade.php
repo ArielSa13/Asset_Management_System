@@ -8,6 +8,32 @@
 @endsection
 
 @section('content')
+<style>
+    /* Override html5-qrcode styles for mobile responsiveness */
+    #qr-reader {
+        width: 100% !important;
+        border: none !important;
+    }
+    #qr-reader video {
+        width: 100% !important;
+        height: auto !important;
+        object-fit: cover !important;
+    }
+    #qr-reader__scan_region {
+        min-height: 250px;
+    }
+    #qr-reader__dashboard {
+        padding: 8px !important;
+    }
+    #qr-reader__dashboard_section_csr button {
+        display: none !important;
+    }
+    @media (max-width: 640px) {
+        #qr-reader__scan_region {
+            min-height: 220px;
+        }
+    }
+</style>
 <div class="w-full max-w-2xl mx-auto" x-data="qrScanner()">
     <!-- Header -->
     <div class="mb-4 px-1">
@@ -33,10 +59,10 @@
         </div>
 
         <!-- Camera View -->
-        <div class="relative bg-black aspect-[4/3] sm:aspect-video">
-            <div id="qr-reader" class="w-full h-full"></div>
+        <div class="relative bg-black">
+            <div id="qr-reader" class="w-full" style="min-height: 280px;"></div>
             
-            <div x-show="!scanning" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900">
+            <div x-show="!scanning" class="absolute inset-0 flex flex-col items-center justify-center bg-gray-900" style="min-height: 280px;">
                 <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-gray-800 flex items-center justify-center mb-3">
                     <svg class="w-7 h-7 sm:w-8 sm:h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 </div>
@@ -232,13 +258,16 @@ function qrScanner() {
             this.scanner = new Html5Qrcode("qr-reader");
             this.scanning = true;
 
-            // Responsive QR box size
-            const screenWidth = window.innerWidth;
-            const qrboxSize = screenWidth < 640 ? 180 : 250;
+            // Responsive QR box size based on container width
+            const containerWidth = document.getElementById('qr-reader').offsetWidth;
+            const qrboxSize = Math.min(Math.floor(containerWidth * 0.55), 250);
 
             this.scanner.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: { width: qrboxSize, height: qrboxSize }, aspectRatio: 1.333 },
+                { 
+                    fps: 10, 
+                    qrbox: { width: qrboxSize, height: qrboxSize }
+                },
                 (decodedText) => this.onScanSuccess(decodedText),
                 () => {}
             ).catch((err) => {
