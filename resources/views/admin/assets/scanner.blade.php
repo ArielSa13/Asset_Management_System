@@ -151,19 +151,49 @@
     <!-- Scan History -->
     <div x-show="scanHistory.length > 0" class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 p-6">
         <div class="flex items-center justify-between mb-4">
-            <h3 class="text-base font-bold text-gray-900 dark:text-white">Riwayat Scan</h3>
-            <button @click="scanHistory = []" class="text-xs text-red-500 hover:text-red-700 font-semibold">Hapus</button>
+            <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <h3 class="text-base font-bold text-gray-900 dark:text-white">Riwayat Scan</h3>
+                <span class="px-2 py-0.5 bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-400 text-xs font-bold rounded-md" x-text="scanHistory.length"></span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button @click="exportPDF()" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 hover:bg-red-100 dark:bg-red-900/20 dark:hover:bg-red-900/40 text-red-700 dark:text-red-400 text-xs font-semibold rounded-lg transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Export PDF
+                </button>
+                <button @click="scanHistory = []" class="inline-flex items-center gap-1 px-3 py-1.5 text-xs text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20 font-semibold rounded-lg transition-all">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    Hapus
+                </button>
+            </div>
         </div>
-        <div class="space-y-2 max-h-60 overflow-y-auto">
-            <template x-for="(item, index) in scanHistory" :key="index">
-                <a :href="'/admin/assets/' + item.id" class="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-700/50 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors">
-                    <div class="flex items-center gap-3 min-w-0">
-                        <span class="text-xs font-mono font-bold text-primary-600 dark:text-primary-400 flex-shrink-0" x-text="item.code"></span>
-                        <span class="text-sm text-gray-700 dark:text-gray-300 truncate" x-text="item.name"></span>
-                    </div>
-                    <span class="text-xs text-gray-400 flex-shrink-0 ml-2" x-text="item.time"></span>
-                </a>
-            </template>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr class="border-b dark:border-gray-700">
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">No</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Kode</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Nama Asset</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Kategori</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Kondisi</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Lokasi</th>
+                        <th class="text-left py-2 px-2 text-xs font-bold text-gray-500 dark:text-gray-400 uppercase">Waktu</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <template x-for="(item, index) in scanHistory" :key="index">
+                        <tr class="border-b dark:border-gray-700/50 hover:bg-gray-50 dark:hover:bg-gray-700/30 transition-colors cursor-pointer" @click="window.location='/admin/assets/' + item.id">
+                            <td class="py-2.5 px-2 text-gray-500" x-text="index + 1"></td>
+                            <td class="py-2.5 px-2 font-mono font-bold text-primary-600 dark:text-primary-400" x-text="item.code"></td>
+                            <td class="py-2.5 px-2 font-semibold text-gray-900 dark:text-white" x-text="item.name"></td>
+                            <td class="py-2.5 px-2 text-gray-600 dark:text-gray-300" x-text="item.category || '-'"></td>
+                            <td class="py-2.5 px-2 text-gray-600 dark:text-gray-300" x-text="item.kondisi || '-'"></td>
+                            <td class="py-2.5 px-2 text-gray-600 dark:text-gray-300" x-text="item.lokasi || '-'"></td>
+                            <td class="py-2.5 px-2 text-gray-400 text-xs" x-text="item.time"></td>
+                        </tr>
+                    </template>
+                </tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -247,9 +277,15 @@ function qrScanner() {
                     id: this.assetData.id,
                     code: this.assetData.kode_asset,
                     name: this.assetData.nama_asset,
+                    category: this.assetData.category || '-',
+                    kondisi: this.assetData.kondisi_label || '-',
+                    lokasi: this.assetData.lokasi || '-',
+                    merk: this.assetData.merk || '-',
+                    model: this.assetData.model || '-',
+                    status: this.assetData.status_label || '-',
                     time: this.scanTime
                 });
-                if (this.scanHistory.length > 10) this.scanHistory.pop();
+                if (this.scanHistory.length > 50) this.scanHistory.pop();
                 this.playBeep();
             })
             .catch(() => {
@@ -270,6 +306,34 @@ function qrScanner() {
                 osc.start();
                 setTimeout(() => osc.stop(), 100);
             } catch(e) {}
+        },
+
+        exportPDF() {
+            if (this.scanHistory.length === 0) return;
+
+            // Send scan history to server to generate PDF
+            const form = document.createElement('form');
+            form.method = 'POST';
+            form.action = '{{ route("admin.assets.scanner.export-pdf") }}';
+            form.target = '_blank';
+
+            // CSRF Token
+            const csrf = document.createElement('input');
+            csrf.type = 'hidden';
+            csrf.name = '_token';
+            csrf.value = '{{ csrf_token() }}';
+            form.appendChild(csrf);
+
+            // Scan data
+            const dataInput = document.createElement('input');
+            dataInput.type = 'hidden';
+            dataInput.name = 'scan_data';
+            dataInput.value = JSON.stringify(this.scanHistory);
+            form.appendChild(dataInput);
+
+            document.body.appendChild(form);
+            form.submit();
+            document.body.removeChild(form);
         }
     }
 }

@@ -138,6 +138,23 @@ class AssetController extends Controller
         return view('admin.assets.scanner');
     }
 
+    public function scannerExportPdf(Request $request)
+    {
+        $scanData = json_decode($request->input('scan_data'), true) ?? [];
+
+        if (empty($scanData)) {
+            return back()->with('error', 'Tidak ada data scan untuk di-export.');
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.assets.scanner-pdf', [
+            'scanData' => $scanData,
+            'exportDate' => now()->format('d F Y, H:i'),
+            'totalScanned' => count($scanData),
+        ]);
+
+        return $pdf->download('riwayat-scan-' . now()->format('Y-m-d_His') . '.pdf');
+    }
+
     public function showImport()
     {
         return view('admin.assets.import');
