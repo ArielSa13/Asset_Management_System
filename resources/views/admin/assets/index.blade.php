@@ -15,10 +15,16 @@
             <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Asset Management</h2>
             <p class="text-base text-gray-600 dark:text-gray-400 mt-2">Manage all your assets in one centralized place.</p>
         </div>
-        <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
-            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            Add New Asset
-        </a>
+        <div class="flex flex-wrap gap-3">
+            <a href="{{ route('admin.assets.print-labels-bulk', request()->query()) }}" target="_blank" class="inline-flex items-center px-5 py-3 bg-white border-2 border-gray-300 hover:border-primary-500 hover:bg-primary-50 text-gray-700 hover:text-primary-700 text-base font-semibold rounded-xl transition-all duration-200">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print QR Labels
+            </a>
+            <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                Add New Asset
+            </a>
+        </div>
     </div>
 
     <!-- Filters -->

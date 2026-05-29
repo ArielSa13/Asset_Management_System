@@ -113,6 +113,26 @@ class AssetController extends Controller
         return view('admin.assets.print-label', compact('asset'));
     }
 
+    public function printLabelsBulk(Request $request)
+    {
+        $query = Asset::query();
+
+        // Optional filters
+        if ($request->filled('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        if ($request->filled('lokasi')) {
+            $query->where('lokasi', $request->lokasi);
+        }
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $assets = $query->orderBy('kode_asset', 'asc')->get();
+
+        return view('admin.assets.print-labels-bulk', compact('assets'));
+    }
+
     public function showImport()
     {
         return view('admin.assets.import');
