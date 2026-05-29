@@ -286,17 +286,9 @@ function qrScanner() {
         },
 
         onScanSuccess(decodedText) {
-            if (this.cooldown || this.lastScanned === decodedText) return;
+            if (this.cooldown) return;
 
-            this.cooldown = true;
-            setTimeout(() => { this.cooldown = false; }, 2000);
-
-            this.lastScanned = decodedText;
-            this.scanTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
-            this.loading = true;
-            this.assetData = null;
-            this.scanError = null;
-
+            // Extract asset code first
             let kodeAsset = decodedText;
             try {
                 const url = new URL(decodedText);
@@ -306,6 +298,45 @@ function qrScanner() {
                     kodeAsset = parts[scanIndex + 1];
                 }
             } catch (e) {}
+
+            // Check if already in scan history - don't add again
+            const alreadyScanned = this.scanHistory.find(item => item.code === kodeAsset);
+            if (alreadyScanned) {
+                // Show existing data without adding to history
+                this.lastScanned = decodedText;
+                this.scanTime = alreadyScanned.time + ' (sudah discan)';
+                this.assetData = {
+                    id: alreadyScanned.id,
+                    kode_asset: alreadyScanned.code,
+                    nama_asset: alreadyScanned.name,
+                    category: alreadyScanned.category,
+                    kondisi_label: alreadyScanned.kondisi,
+                    lokasi: alreadyScanned.lokasi,
+                    merk: alreadyScanned.merk,
+                    model: alreadyScanned.model,
+                    status: alreadyScanned.status?.toLowerCase().replace(' ', '_') || 'available',
+                    status_label: alreadyScanned.status,
+                    borrower: null,
+                };
+                this.loading = false;
+                this.scanError = null;
+
+                this.cooldown = true;
+                setTimeout(() => { this.cooldown = false; }, 2000);
+                return;
+            }
+
+            // New scan
+            if (this.lastScanned === decodedText) return;
+
+            this.cooldown = true;
+            setTimeout(() => { this.cooldown = false; }, 2000);
+
+            this.lastScanned = decodedText;
+            this.scanTime = new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute: '2-digit', second: '2-digit'});
+            this.loading = true;
+            this.assetData = null;
+            this.scanError = null;
 
             fetch(`/api/scan/${kodeAsset}`, { headers: { 'Accept': 'application/json' } })
             .then(res => {
