@@ -262,8 +262,6 @@ class AssetController extends Controller
 
         return response()->download($temp_file, $fileName)->deleteFileAfterSend(true);
     }
-}
-
 
     public function previewCode(Category $category)
     {
@@ -277,3 +275,4 @@ class AssetController extends Controller
             'category' => $category->name
         ]);
     }
+}
