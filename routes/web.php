@@ -57,6 +57,7 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     Route::resource('assets', AssetController::class);
     Route::get('assets/{asset}/print-label', [AssetController::class, 'printLabel'])->name('assets.print-label');
     Route::get('assets-print-labels', [AssetController::class, 'printLabelsBulk'])->name('assets.print-labels-bulk');
+    Route::get('assets-scanner', [AssetController::class, 'scanner'])->name('assets.scanner');
     Route::post('assets/{asset}/regenerate-qr', [AssetController::class, 'regenerateQr'])->name('assets.regenerate-qr');
     Route::get('assets-preview-code/{category}', [AssetController::class, 'previewCode'])->name('assets.preview-code');
     Route::get('assets-import', [AssetController::class, 'showImport'])->name('assets.import');

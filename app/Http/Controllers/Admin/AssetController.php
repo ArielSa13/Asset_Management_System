@@ -133,6 +133,11 @@ class AssetController extends Controller
         return view('admin.assets.print-labels-bulk', compact('assets'));
     }
 
+    public function scanner()
+    {
+        return view('admin.assets.scanner');
+    }
+
     public function showImport()
     {
         return view('admin.assets.import');
