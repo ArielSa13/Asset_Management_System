@@ -133,14 +133,11 @@
             <!-- QR Code -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 text-center">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">QR Code</h3>
-                @if($asset->qr_code)
-                <img src="{{ Storage::url($asset->qr_code) }}" alt="QR Code" class="mx-auto w-48 h-48 border rounded-lg">
-                @else
-                <div class="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">No QR Code</p>
+                <div class="mx-auto w-48 h-48 border rounded-lg overflow-hidden flex items-center justify-center bg-white p-2">
+                    {!! QrCode::format('svg')->size(180)->errorCorrection('H')->margin(1)->generate(url("/scan/{$asset->kode_asset}")) !!}
                 </div>
-                @endif
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 font-mono">{{ $asset->kode_asset }}</p>
+                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 font-mono">{{ $asset->kode_asset }}</p>
+                <p class="mt-1 text-xs text-primary-600 dark:text-primary-400 break-all">{{ url("/scan/{$asset->kode_asset}") }}</p>
             </div>
 
             <!-- Photo -->

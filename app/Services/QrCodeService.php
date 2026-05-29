@@ -10,12 +10,11 @@ class QrCodeService
 {
     /**
      * Generate QR code for an asset (SVG format - no imagick needed).
-     * Uses APP_URL from .env so QR code matches current domain (ngrok, production, etc.)
+     * ALWAYS uses current APP_URL so it auto-adapts to ngrok/production.
      */
     public function generate(Asset $asset): string
     {
-        // Always use APP_URL from config so it works with ngrok/production
-        $url = rtrim(config('app.url'), '/') . "/scan/{$asset->kode_asset}";
+        $url = $this->getScanUrl($asset);
         $filename = "qrcodes/{$asset->kode_asset}.svg";
         $path = storage_path("app/public/{$filename}");
 
@@ -35,6 +34,30 @@ class QrCodeService
         file_put_contents($path, $svg);
 
         return $filename;
+    }
+
+    /**
+     * Generate QR code as inline SVG string (dynamic, always uses current URL).
+     * This is the PREFERRED method - no file caching, always up-to-date.
+     */
+    public function generateInlineSvg(Asset $asset, int $size = 300): string
+    {
+        $url = $this->getScanUrl($asset);
+
+        return QrCode::format('svg')
+            ->size($size)
+            ->errorCorrection('H')
+            ->margin(1)
+            ->generate($url);
+    }
+
+    /**
+     * Get the scan URL for an asset based on current APP_URL.
+     * This ensures QR codes always match the current domain (ngrok, production, etc.)
+     */
+    public function getScanUrl(Asset $asset): string
+    {
+        return rtrim(config('app.url'), '/') . "/scan/{$asset->kode_asset}";
     }
 
     /**
@@ -71,7 +94,7 @@ class QrCodeService
     }
 
     /**
-     * Get the public URL for a QR code.
+     * Get the public URL for a QR code file.
      */
     public function getUrl(Asset $asset): ?string
     {
