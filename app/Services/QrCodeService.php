@@ -10,10 +10,12 @@ class QrCodeService
 {
     /**
      * Generate QR code for an asset (SVG format - no imagick needed).
+     * Uses APP_URL from .env so QR code matches current domain (ngrok, production, etc.)
      */
     public function generate(Asset $asset): string
     {
-        $url = url("/scan/{$asset->kode_asset}");
+        // Always use APP_URL from config so it works with ngrok/production
+        $url = rtrim(config('app.url'), '/') . "/scan/{$asset->kode_asset}";
         $filename = "qrcodes/{$asset->kode_asset}.svg";
         $path = storage_path("app/public/{$filename}");
 
@@ -49,6 +51,23 @@ class QrCodeService
         $asset->update(['qr_code' => $filename]);
 
         return $filename;
+    }
+
+    /**
+     * Regenerate ALL QR codes (useful when APP_URL changes, e.g. switching to ngrok).
+     * Run: php artisan qr:regenerate-all
+     */
+    public function regenerateAll(): int
+    {
+        $assets = Asset::all();
+        $count = 0;
+
+        foreach ($assets as $asset) {
+            $this->regenerate($asset);
+            $count++;
+        }
+
+        return $count;
     }
 
     /**
