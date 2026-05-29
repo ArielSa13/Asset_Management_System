@@ -8,37 +8,38 @@
 @endsection
 
 @section('content')
-<div class="space-y-6">
+<div class="space-y-8">
     <!-- Header -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-            <h2 class="text-2xl font-bold text-gray-900 dark:text-white">Assets</h2>
-            <p class="text-sm text-gray-500 dark:text-gray-400">Manage all your assets in one place.</p>
+            <h2 class="text-3xl font-bold text-gray-900 dark:text-white">Asset Management</h2>
+            <p class="text-base text-gray-600 dark:text-gray-400 mt-2">Manage all your assets in one centralized place.</p>
         </div>
-        <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-4 py-2.5 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg transition-colors shadow-sm">
+        <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-            Add Asset
+            Add New Asset
         </a>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-4">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 p-6">
         <form method="GET" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             <div>
-                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search assets..." class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
+                <input type="text" name="search" value="{{ request('search') }}" placeholder="Search assets..." 
+                       class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
             </div>
             <div>
-                <select name="status" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
+                <select name="status" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
                     <option value="">All Status</option>
-                    <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
-                    <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}>Borrowed</option>
-                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>Maintenance</option>
-                    <option value="broken" {{ request('status') == 'broken' ? 'selected' : '' }}>Broken</option>
-                    <option value="lost" {{ request('status') == 'lost' ? 'selected' : '' }}>Lost</option>
+                    <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>✓ Available</option>
+                    <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}>📦 Borrowed</option>
+                    <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>⚙ Maintenance</option>
+                    <option value="broken" {{ request('status') == 'broken' ? 'selected' : '' }}>✕ Broken</option>
+                    <option value="lost" {{ request('status') == 'lost' ? 'selected' : '' }}>⚠ Lost</option>
                 </select>
             </div>
             <div>
-                <select name="category_id" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
+                <select name="category_id" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
                     <option value="">All Categories</option>
                     @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>{{ $category->name }}</option>
@@ -46,74 +47,81 @@
                 </select>
             </div>
             <div>
-                <select name="kondisi" class="w-full rounded-lg border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-sm focus:ring-primary-500 focus:border-primary-500">
+                <select name="kondisi" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
                     <option value="">All Conditions</option>
-                    <option value="baik" {{ request('kondisi') == 'baik' ? 'selected' : '' }}>Baik</option>
-                    <option value="cukup" {{ request('kondisi') == 'cukup' ? 'selected' : '' }}>Cukup</option>
-                    <option value="rusak_ringan" {{ request('kondisi') == 'rusak_ringan' ? 'selected' : '' }}>Rusak Ringan</option>
-                    <option value="rusak_berat" {{ request('kondisi') == 'rusak_berat' ? 'selected' : '' }}>Rusak Berat</option>
+                    <option value="baik" {{ request('kondisi') == 'baik' ? 'selected' : '' }}>✓ Baik</option>
+                    <option value="cukup" {{ request('kondisi') == 'cukup' ? 'selected' : '' }}>⚠ Cukup</option>
+                    <option value="rusak_ringan" {{ request('kondisi') == 'rusak_ringan' ? 'selected' : '' }}>⚡ Rusak Ringan</option>
+                    <option value="rusak_berat" {{ request('kondisi') == 'rusak_berat' ? 'selected' : '' }}>✕ Rusak Berat</option>
                 </select>
             </div>
             <div class="flex gap-2">
-                <button type="submit" class="flex-1 px-4 py-2 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-sm font-medium rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">Filter</button>
-                <a href="{{ route('admin.assets.index') }}" class="px-4 py-2 text-gray-500 text-sm hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">Reset</a>
+                <button type="submit" class="flex-1 px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                    <svg class="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"/></svg>
+                    Filter
+                </button>
+                <a href="{{ route('admin.assets.index') }}" class="px-4 py-3 text-gray-500 text-base hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 font-semibold transition-colors">Reset</a>
             </div>
         </form>
     </div>
 
     <!-- Table -->
-    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 overflow-hidden">
+    <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border dark:border-gray-700 overflow-hidden">
         @if($assets->count() > 0)
         <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-                <thead class="bg-gray-50 dark:bg-gray-700/50">
+            <table class="w-full">
+                <thead class="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-700/50 dark:to-gray-700/30">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Asset Code</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Name</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Category</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Condition</th>
-                        <th class="px-6 py-3 text-right text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider">Actions</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Asset Code</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Asset Details</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Category</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Status</th>
+                        <th class="px-8 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Condition</th>
+                        <th class="px-8 py-4 text-right text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Actions</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach($assets as $asset)
-                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="font-mono text-sm font-semibold text-primary-600 dark:text-primary-400">{{ $asset->kode_asset }}</span>
+                    <tr class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-150">
+                        <td class="px-8 py-5 whitespace-nowrap">
+                            <span class="font-mono text-base font-bold text-primary-600 dark:text-primary-400">{{ $asset->kode_asset }}</span>
                         </td>
-                        <td class="px-6 py-4">
+                        <td class="px-8 py-5">
                             <div class="flex items-center">
                                 @if($asset->foto_asset)
-                                <img src="{{ Storage::url($asset->foto_asset) }}" class="w-8 h-8 rounded-lg object-cover mr-3" alt="">
+                                <img src="{{ Storage::url($asset->foto_asset) }}" class="w-12 h-12 rounded-xl object-cover mr-4 border-2 border-gray-200 dark:border-gray-600" alt="">
                                 @else
-                                <div class="w-8 h-8 rounded-lg bg-gray-200 dark:bg-gray-600 flex items-center justify-center mr-3">
-                                    <svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                                <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-gray-200 to-gray-300 dark:from-gray-600 dark:to-gray-700 flex items-center justify-center mr-4">
+                                    <svg class="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
                                 </div>
                                 @endif
                                 <div>
-                                    <p class="font-medium text-gray-900 dark:text-white">{{ $asset->nama_asset }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ $asset->merk }} {{ $asset->model }}</p>
+                                    <p class="text-base font-semibold text-gray-900 dark:text-white">{{ $asset->nama_asset }}</p>
+                                    <p class="text-sm text-gray-500 dark:text-gray-400">{{ $asset->merk }} {{ $asset->model }}</p>
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">{{ $asset->category?->name }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="px-2.5 py-0.5 text-xs font-medium rounded-full {{ $asset->status_badge }}">{{ $asset->status_label }}</span>
+                        <td class="px-8 py-5 whitespace-nowrap">
+                            <span class="inline-flex items-center px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-700 text-sm font-semibold text-gray-700 dark:text-gray-300">
+                                {{ $asset->category?->name }}
+                            </span>
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-gray-700 dark:text-gray-300">{{ $asset->kondisi_label }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-right">
+                        <td class="px-8 py-5 whitespace-nowrap">
+                            <span class="px-3 py-1.5 text-sm font-bold rounded-lg {{ $asset->status_badge }}">{{ $asset->status_label }}</span>
+                        </td>
+                        <td class="px-8 py-5 whitespace-nowrap text-base font-semibold text-gray-700 dark:text-gray-300">{{ $asset->kondisi_label }}</td>
+                        <td class="px-8 py-5 whitespace-nowrap text-right">
                             <div class="flex items-center justify-end space-x-2">
-                                <a href="{{ route('admin.assets.show', $asset) }}" class="p-1.5 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400" title="View">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                <a href="{{ route('admin.assets.show', $asset) }}" class="p-2.5 text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-primary-400 hover:bg-primary-50 dark:hover:bg-primary-900/20 rounded-lg transition-all duration-150" title="View">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                                 </a>
-                                <a href="{{ route('admin.assets.edit', $asset) }}" class="p-1.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400" title="Edit">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                <a href="{{ route('admin.assets.edit', $asset) }}" class="p-2.5 text-gray-500 hover:text-yellow-600 dark:text-gray-400 dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 rounded-lg transition-all duration-150" title="Edit">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                                 </a>
-                                <form action="{{ route('admin.assets.destroy', $asset) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this asset?')">
+                                <form action="{{ route('admin.assets.destroy', $asset) }}" method="POST" class="inline" onsubmit="return confirm('Are you sure you want to delete this asset? This action cannot be undone.')">
                                     @csrf @method('DELETE')
-                                    <button type="submit" class="p-1.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400" title="Delete">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <button type="submit" class="p-2.5 text-gray-500 hover:text-red-600 dark:text-gray-400 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-150" title="Delete">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                     </button>
                                 </form>
                             </div>
@@ -123,16 +131,18 @@
                 </tbody>
             </table>
         </div>
-        <div class="px-6 py-4 border-t dark:border-gray-700">
+        <div class="px-8 py-5 border-t dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
             {{ $assets->links() }}
         </div>
         @else
-        <div class="text-center py-12">
-            <svg class="w-16 h-16 mx-auto text-gray-300 dark:text-gray-600 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-            <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-1">No assets found</h3>
-            <p class="text-gray-500 dark:text-gray-400 mb-4">Get started by creating your first asset.</p>
-            <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white text-sm font-medium rounded-lg">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+        <div class="text-center py-16 px-4">
+            <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gray-100 dark:bg-gray-700 mb-5">
+                <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">No assets found</h3>
+            <p class="text-base text-gray-500 dark:text-gray-400 mb-6">Get started by creating your first asset to track.</p>
+            <a href="{{ route('admin.assets.create') }}" class="inline-flex items-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white text-base font-bold rounded-xl transition-all duration-200 shadow-lg">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
                 Add Asset
             </a>
         </div>
