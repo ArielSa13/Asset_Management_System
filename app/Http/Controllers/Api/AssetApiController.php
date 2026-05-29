@@ -56,13 +56,24 @@ class AssetApiController extends Controller
             ], 404);
         }
 
-        $data = $asset->toArray();
-        $data['category'] = $asset->category?->name;
-        $data['borrower'] = $asset->activeBorrowing?->borrower_name;
-
         return response()->json([
             'success' => true,
-            'data' => $data,
+            'data' => [
+                'id' => $asset->id,
+                'kode_asset' => $asset->kode_asset,
+                'nama_asset' => $asset->nama_asset,
+                'merk' => $asset->merk ?? '-',
+                'model' => $asset->model ?? '-',
+                'serial_number' => $asset->serial_number ?? '-',
+                'kondisi' => $asset->kondisi,
+                'kondisi_label' => $asset->kondisi_label,
+                'status' => $asset->status,
+                'status_label' => $asset->status_label,
+                'status_badge' => $asset->status_badge,
+                'lokasi' => $asset->lokasi ?? '-',
+                'category' => $asset->category?->name ?? '-',
+                'borrower' => $asset->activeBorrowing?->borrower_name,
+            ],
         ]);
     }
 }
