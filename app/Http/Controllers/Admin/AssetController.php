@@ -146,14 +146,23 @@ class AssetController extends Controller
             return back()->with('error', 'Tidak ada data scan untuk di-export.');
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.assets.scanner-pdf', [
+        $action = $request->input('action', 'preview');
+
+        if ($action === 'download') {
+            $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.assets.scanner-pdf', [
+                'scanData' => $scanData,
+                'exportDate' => now()->format('d F Y, H:i'),
+                'totalScanned' => count($scanData),
+            ]);
+            return $pdf->download('riwayat-scan-' . now()->format('Y-m-d_His') . '.pdf');
+        }
+
+        // Default: show preview page with print/download buttons
+        return view('admin.assets.scanner-pdf-preview', [
             'scanData' => $scanData,
             'exportDate' => now()->format('d F Y, H:i'),
             'totalScanned' => count($scanData),
         ]);
-
-        // Stream = preview di browser (bisa pilih print atau download)
-        return $pdf->stream('riwayat-scan-' . now()->format('Y-m-d_His') . '.pdf');
     }
 
     public function showImport()
