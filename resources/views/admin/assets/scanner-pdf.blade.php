@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <title>Riwayat Scan QR Code</title>
     <style>
+        @page {
+            margin: 20mm 15mm 20mm 15mm;
+        }
         * {
             margin: 0;
             padding: 0;
@@ -14,26 +17,27 @@
             font-size: 11px;
             color: #1f2937;
             line-height: 1.5;
+            padding: 10px;
         }
         .header {
             text-align: center;
-            padding: 20px 0 16px;
+            padding: 24px 0 20px;
             border-bottom: 3px solid #2563eb;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         .header h1 {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             color: #1e3a8a;
-            margin-bottom: 4px;
+            margin-bottom: 6px;
         }
         .header p {
-            font-size: 11px;
+            font-size: 12px;
             color: #6b7280;
         }
         .meta-info {
-            margin-bottom: 16px;
-            padding: 10px 14px;
+            margin-bottom: 20px;
+            padding: 14px 18px;
             background-color: #f0f9ff;
             border: 1px solid #bfdbfe;
             border-radius: 6px;
@@ -42,8 +46,8 @@
             width: 100%;
         }
         .meta-info td {
-            padding: 3px 8px;
-            font-size: 10px;
+            padding: 4px 10px;
+            font-size: 11px;
         }
         .meta-info .label {
             color: #6b7280;
@@ -56,12 +60,12 @@
         table.scan-table {
             width: 100%;
             border-collapse: collapse;
-            margin-top: 12px;
+            margin-top: 16px;
         }
         table.scan-table thead th {
             background-color: #2563eb;
             color: #ffffff;
-            padding: 10px 8px;
+            padding: 12px 10px;
             text-align: left;
             font-size: 9px;
             font-weight: 700;
@@ -69,7 +73,7 @@
             letter-spacing: 0.5px;
         }
         table.scan-table tbody td {
-            padding: 9px 8px;
+            padding: 11px 10px;
             border-bottom: 1px solid #e5e7eb;
             font-size: 10px;
             vertical-align: top;
