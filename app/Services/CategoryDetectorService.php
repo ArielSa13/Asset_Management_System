@@ -31,6 +31,27 @@ class CategoryDetectorService
     {
         $assetNameLower = Str::lower($assetName);
 
+        // Check for ACCESSORY indicators first (highest priority)
+        // These words indicate the item is an accessory, not the main device
+        $accessoryIndicators = [
+            'tas', 'softcase', 'soft case', 'hardcase', 'hard case', 'case',
+            'backpack', 'ransel', 'bag', 'pouch', 'sarung', 'cover',
+            'holder', 'stand', 'bracket', 'mount', 'strap', 'tali'
+        ];
+        
+        foreach ($accessoryIndicators as $indicator) {
+            if (preg_match('/\b' . preg_quote($indicator, '/') . '\b/i', $assetNameLower)) {
+                // This is an accessory, try to find "Accessories" or similar category
+                $accessoryCategory = $this->getAccessoryCategory();
+                if ($accessoryCategory) {
+                    return $accessoryCategory;
+                }
+                // If no accessory category, continue with normal detection
+                // but penalize non-accessory categories
+                break;
+            }
+        }
+
         // Get all active categories with their descriptions
         $categories = Category::active()->get();
 
@@ -122,6 +143,33 @@ class CategoryDetectorService
 
         // Fallback: assign to "Perangkat Lainnya" category
         return $this->getFallbackCategory();
+    }
+
+    /**
+     * Get the Accessories/Pelengkap category
+     */
+    public function getAccessoryCategory(): ?Category
+    {
+        // Try to find existing accessory category
+        $accessory = Category::where(function($q) {
+            $q->where('name', 'like', '%accessories%')
+              ->orWhere('name', 'like', '%pelengkap%')
+              ->orWhere('name', 'like', '%aksesoris%')
+              ->orWhere('prefix', 'ACC')
+              ->orWhere('prefix', 'SFC'); // Soft case prefix
+        })->first();
+
+        if ($accessory) {
+            return $accessory;
+        }
+
+        // Auto-create "Accessories" category if not exists
+        return Category::create([
+            'name' => 'Accessories',
+            'prefix' => 'ACC',
+            'description' => 'tas, softcase, hardcase, bag, backpack, ransel, case, cover, holder, stand, bracket, mount, strap, tali, sarung, pouch',
+            'is_active' => true,
+        ]);
     }
 
     /**
