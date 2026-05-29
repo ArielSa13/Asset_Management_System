@@ -15,6 +15,11 @@ class CategoryDetectorService
      * - Example: Category "Peripherals" has description: "keyboard, headphone, microphone, mouse"
      * - When importing "Keyboard Logitech G Pro", it matches "keyboard" → Peripherals
      * 
+     * Priority System:
+     * - Uses longest keyword match first (more specific wins)
+     * - "Adaptor Notebook" → matches "adaptor" (8 chars) > "notebook" (8 chars)
+     * - First match with longest keyword wins
+     * 
      * Falls back to "Perangkat Lainnya" if no keyword matches.
      */
     public function detectCategory(string $assetName): ?Category
@@ -23,6 +28,9 @@ class CategoryDetectorService
 
         // Get all active categories with their descriptions
         $categories = Category::active()->get();
+
+        // Build a match scoring system: [category => [matched_keyword => score]]
+        $matches = [];
 
         foreach ($categories as $category) {
             // Skip categories without description
@@ -38,20 +46,67 @@ class CategoryDetectorService
                 
                 // Check if asset name contains this keyword
                 if (Str::contains($assetNameLower, $keyword)) {
-                    return $category;
+                    // Score based on keyword length (longer = more specific)
+                    $score = strlen($keyword);
+                    
+                    // Bonus score if keyword appears at the start
+                    if (Str::startsWith($assetNameLower, $keyword)) {
+                        $score += 100; // High bonus for starting with keyword
+                    }
+                    
+                    // Bonus score if keyword is an exact word (not part of another word)
+                    if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/', $assetNameLower)) {
+                        $score += 50; // Bonus for exact word match
+                    }
+                    
+                    // Store the match with highest score for this category
+                    if (!isset($matches[$category->id]) || $score > $matches[$category->id]['score']) {
+                        $matches[$category->id] = [
+                            'category' => $category,
+                            'keyword' => $keyword,
+                            'score' => $score
+                        ];
+                    }
                 }
             }
         }
 
-        // Also try matching by category name or prefix directly
+        // If we have matches, return the one with highest score
+        if (!empty($matches)) {
+            usort($matches, function($a, $b) {
+                return $b['score'] - $a['score'];
+            });
+            
+            return $matches[0]['category'];
+        }
+
+        // Also try matching by category name or prefix directly (with scoring)
+        $nameMatches = [];
         foreach ($categories as $category) {
             $categoryNameLower = Str::lower($category->name);
             $prefixLower = Str::lower($category->prefix);
             
-            if (Str::contains($assetNameLower, $categoryNameLower) || 
-                Str::contains($assetNameLower, $prefixLower)) {
-                return $category;
+            if (Str::contains($assetNameLower, $categoryNameLower)) {
+                $score = strlen($categoryNameLower);
+                if (Str::startsWith($assetNameLower, $categoryNameLower)) {
+                    $score += 100;
+                }
+                $nameMatches[] = ['category' => $category, 'score' => $score];
+            } elseif (Str::contains($assetNameLower, $prefixLower)) {
+                $score = strlen($prefixLower);
+                if (Str::startsWith($assetNameLower, $prefixLower)) {
+                    $score += 100;
+                }
+                $nameMatches[] = ['category' => $category, 'score' => $score];
             }
+        }
+        
+        if (!empty($nameMatches)) {
+            usort($nameMatches, function($a, $b) {
+                return $b['score'] - $a['score'];
+            });
+            
+            return $nameMatches[0]['category'];
         }
 
         // Fallback: assign to "Perangkat Lainnya" category
