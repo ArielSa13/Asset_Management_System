@@ -16,9 +16,14 @@ class CategoryDetectorService
      * - When importing "Keyboard Logitech G Pro", it matches "keyboard" → Peripherals
      * 
      * Priority System:
-     * - Uses longest keyword match first (more specific wins)
-     * - "Adaptor Notebook" → matches "adaptor" (8 chars) > "notebook" (8 chars)
-     * - First match with longest keyword wins
+     * - Uses EXACT WORD MATCH with longest keyword (more specific wins)
+     * - "Adaptor Notebook" → matches "adaptor" (at start, score: 157) > "notebook" (middle, score: 58)
+     * - "Monopod" → NO match with "mon" from "monitor" (not exact word) ✓
+     * 
+     * Scoring:
+     * - Base: keyword length (longer = more specific)
+     * - +100: keyword at START of name
+     * - +50: always added (all matches are exact words)
      * 
      * Falls back to "Perangkat Lainnya" if no keyword matches.
      */
@@ -44,29 +49,30 @@ class CategoryDetectorService
             foreach ($keywords as $keyword) {
                 if (empty($keyword)) continue;
                 
-                // Check if asset name contains this keyword
-                if (Str::contains($assetNameLower, $keyword)) {
-                    // Score based on keyword length (longer = more specific)
-                    $score = strlen($keyword);
-                    
-                    // Bonus score if keyword appears at the start
-                    if (Str::startsWith($assetNameLower, $keyword)) {
-                        $score += 100; // High bonus for starting with keyword
-                    }
-                    
-                    // Bonus score if keyword is an exact word (not part of another word)
-                    if (preg_match('/\b' . preg_quote($keyword, '/') . '\b/', $assetNameLower)) {
-                        $score += 50; // Bonus for exact word match
-                    }
-                    
-                    // Store the match with highest score for this category
-                    if (!isset($matches[$category->id]) || $score > $matches[$category->id]['score']) {
-                        $matches[$category->id] = [
-                            'category' => $category,
-                            'keyword' => $keyword,
-                            'score' => $score
-                        ];
-                    }
+                // ONLY match exact words using word boundaries
+                // This prevents "monopod" from matching "mon" in "monitor"
+                if (!preg_match('/\b' . preg_quote($keyword, '/') . '\b/i', $assetNameLower)) {
+                    continue; // Skip if not exact word match
+                }
+                
+                // Score based on keyword length (longer = more specific)
+                $score = strlen($keyword);
+                
+                // Bonus score if keyword appears at the start
+                if (Str::startsWith($assetNameLower, $keyword)) {
+                    $score += 100; // High bonus for starting with keyword
+                }
+                
+                // Already exact word match, add bonus
+                $score += 50; // Bonus for exact word match
+                
+                // Store the match with highest score for this category
+                if (!isset($matches[$category->id]) || $score > $matches[$category->id]['score']) {
+                    $matches[$category->id] = [
+                        'category' => $category,
+                        'keyword' => $keyword,
+                        'score' => $score
+                    ];
                 }
             }
         }
@@ -80,23 +86,28 @@ class CategoryDetectorService
             return $matches[0]['category'];
         }
 
-        // Also try matching by category name or prefix directly (with scoring)
+        // Also try matching by category name or prefix directly (with exact word match)
         $nameMatches = [];
         foreach ($categories as $category) {
             $categoryNameLower = Str::lower($category->name);
             $prefixLower = Str::lower($category->prefix);
             
-            if (Str::contains($assetNameLower, $categoryNameLower)) {
+            // Check category name with exact word boundary
+            if (preg_match('/\b' . preg_quote($categoryNameLower, '/') . '\b/i', $assetNameLower)) {
                 $score = strlen($categoryNameLower);
                 if (Str::startsWith($assetNameLower, $categoryNameLower)) {
                     $score += 100;
                 }
+                $score += 50; // Exact word bonus
                 $nameMatches[] = ['category' => $category, 'score' => $score];
-            } elseif (Str::contains($assetNameLower, $prefixLower)) {
+            }
+            // Check prefix with exact word boundary
+            elseif (preg_match('/\b' . preg_quote($prefixLower, '/') . '\b/i', $assetNameLower)) {
                 $score = strlen($prefixLower);
                 if (Str::startsWith($assetNameLower, $prefixLower)) {
                     $score += 100;
                 }
+                $score += 50; // Exact word bonus
                 $nameMatches[] = ['category' => $category, 'score' => $score];
             }
         }
