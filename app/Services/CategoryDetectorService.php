@@ -10,28 +10,25 @@ class CategoryDetectorService
     /**
      * Detect category from asset name using Category description keywords.
      * 
-     * How it works:
-     * - Each Category has a 'description' field that contains keywords (comma-separated)
-     * - Example: Category "Peripherals" has description: "keyboard, headphone, microphone, mouse"
-     * - When importing "Keyboard Logitech G Pro", it matches "keyboard" → Peripherals
-     * 
      * Priority System:
-     * - Uses EXACT WORD MATCH with longest keyword (more specific wins)
-     * - "Adaptor Notebook" → matches "adaptor" (at start, score: 157) > "notebook" (middle, score: 58)
-     * - "Monopod" → NO match with "mon" from "monitor" (not exact word) ✓
+     * 1. ACCESSORY INDICATORS (highest priority)
+     *    - tas, softcase, case, bag, backpack → Accessories category
+     * 2. EXACT WORD MATCH with scoring
+     *    - Longer keywords win (more specific)
+     *    - +100 if keyword at START
+     *    - +50 for exact word match
+     * 3. FALLBACK to "Perangkat Lainnya"
      * 
-     * Scoring:
-     * - Base: keyword length (longer = more specific)
-     * - +100: keyword at START of name
-     * - +50: always added (all matches are exact words)
-     * 
-     * Falls back to "Perangkat Lainnya" if no keyword matches.
+     * Examples:
+     * - "TAS CAMERA" → Accessories (not Kamera) ✓
+     * - "SOFTCASE NOTEBOOK" → Accessories (not Komputer) ✓
+     * - "CAMERA CANON" → Kamera (no accessory indicator) ✓
      */
     public function detectCategory(string $assetName): ?Category
     {
         $assetNameLower = Str::lower($assetName);
 
-        // Check for ACCESSORY indicators first (highest priority)
+        // STEP 1: Check for ACCESSORY indicators first (highest priority)
         // These words indicate the item is an accessory, not the main device
         $accessoryIndicators = [
             'tas', 'softcase', 'soft case', 'hardcase', 'hard case', 'case',
@@ -41,17 +38,12 @@ class CategoryDetectorService
         
         foreach ($accessoryIndicators as $indicator) {
             if (preg_match('/\b' . preg_quote($indicator, '/') . '\b/i', $assetNameLower)) {
-                // This is an accessory, try to find "Accessories" or similar category
-                $accessoryCategory = $this->getAccessoryCategory();
-                if ($accessoryCategory) {
-                    return $accessoryCategory;
-                }
-                // If no accessory category, continue with normal detection
-                // but penalize non-accessory categories
-                break;
+                // This is an accessory, return Accessories category
+                return $this->getAccessoryCategory();
             }
         }
 
+        // STEP 2: Normal category detection with keyword matching
         // Get all active categories with their descriptions
         $categories = Category::active()->get();
 
