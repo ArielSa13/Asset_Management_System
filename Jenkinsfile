@@ -12,16 +12,11 @@ pipeline {
     stage('Deploy') {
         steps {
             sh '''
-            echo "Fix SSH trust + deploy"
+            echo "Deploy from Jenkins workspace"
 
-            git config --global --add safe.directory /srv/apps/asset-staging
+            git config --global --add safe.directory /var/jenkins_home/workspace/Stag_Asset
 
-            mkdir -p ~/.ssh
-            ssh-keyscan github.com >> ~/.ssh/known_hosts
-
-            cd /srv/apps/asset-staging
-            git pull origin develop
-
+            docker compose down || true
             docker compose up -d --build
             '''
         }
