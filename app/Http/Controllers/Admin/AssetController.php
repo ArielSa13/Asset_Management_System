@@ -28,7 +28,7 @@ class AssetController extends Controller
             ->filterKondisi($request->kondisi)
             ->when($request->lokasi, fn($q, $lokasi) => $q->where('lokasi', $lokasi))
             ->orderBy('kode_asset', 'asc')
-            ->paginate(15)
+            ->paginate(50)
             ->withQueryString();
 
         $categories = Category::active()->get();

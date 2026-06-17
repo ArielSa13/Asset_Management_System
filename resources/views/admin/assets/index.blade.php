@@ -38,7 +38,7 @@
                 <select name="status" class="w-full rounded-xl border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white text-base py-3 px-4 focus:ring-2 focus:ring-primary-500 focus:border-primary-500 transition-all duration-200">
                     <option value="">All Status</option>
                     <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>✓ Available</option>
-                    <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}>📦 Borrowed</option>
+                    <option value="borrowed" {{ request('status') == 'borrowed' ? 'selected' : '' }}> Borrowed</option>
                     <option value="maintenance" {{ request('status') == 'maintenance' ? 'selected' : '' }}>⚙ Maintenance</option>
                     <option value="broken" {{ request('status') == 'broken' ? 'selected' : '' }}>✕ Broken</option>
                     <option value="lost" {{ request('status') == 'lost' ? 'selected' : '' }}>⚠ Lost</option>
