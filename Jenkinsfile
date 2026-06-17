@@ -10,16 +10,22 @@ pipeline {
     }
 
     stage('Deploy') {
-      steps {
-        sh '''
-          echo "Deploy jalan..."
-          git config --global --add safe.directory /srv/apps/asset-staging
-          cd /srv/apps/asset-staging
-          git pull origin develop
-          docker compose up -d --build
-        '''
-      }
-    }
+        steps {
+            sh '''
+            echo "Fix SSH trust + deploy"
+
+            git config --global --add safe.directory /srv/apps/asset-staging
+
+            mkdir -p ~/.ssh
+            ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+            cd /srv/apps/asset-staging
+            git pull origin develop
+
+            docker compose up -d --build
+            '''
+        }
+        }
 
   }
 }
