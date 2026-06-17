@@ -3,24 +3,22 @@ pipeline {
 
   stages {
 
-    stage('Checkout') {
+    stage('Deploy') {
       steps {
-        checkout scm
+        sh '''
+          echo "Deploy START"
+
+          cd /srv/apps/asset-staging
+
+          git pull origin develop
+
+          docker-compose down || true
+          docker-compose up -d --build
+
+          echo "Deploy SUCCESS"
+        '''
       }
     }
-
-    stage('Deploy') {
-        steps {
-            sh '''
-            echo "Deploy from Jenkins workspace"
-
-            git config --global --add safe.directory /var/jenkins_home/workspace/Stag_Asset
-
-             /usr/local/bin/docker-compose down || true
-             /usr/local/bin/docker-compose up -d --build
-            '''
-        }
-        }
 
   }
 }
