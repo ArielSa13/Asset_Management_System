@@ -4,21 +4,20 @@ pipeline {
   stages {
 
     stage('Deploy') {
-      steps {
-        sh '''
-          echo "Deploy START"
+  steps {
+    sh '''
+      echo "Deploy START"
 
-          cd /srv/apps/asset-staging
+      git config --global --add safe.directory /srv/apps/asset-staging
 
-          git pull origin develop
+      cd /srv/apps/asset-staging
 
-          docker-compose down || true
-          docker-compose up -d --build
+      git pull origin develop
 
-          echo "Deploy SUCCESS"
-        '''
-      }
-    }
+      docker-compose up -d --build
+    '''
+  }
+}
 
   }
 }
