@@ -13,8 +13,8 @@ pipeline {
       cd /srv/apps/asset-staging
 
       git pull origin develop
-
-      docker-compose up -d --build
+      docker compose down
+      docker compose up -d --build
     '''
   }
 }
