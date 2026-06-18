@@ -11,22 +11,22 @@ pipeline {
         }
 
         stage('Deploy') {
-            steps {
-                sh '''
-                    echo "=== DEPLOY START ==="
-
-                    # 1. Hentikan dan hapus container lama beserta network internalnya (jika ada)
-                    docker-compose down
-
-                    # 2. Bangun ulang image dan jalankan container baru di background
-                    docker-compose up -d --build --force-recreate
-
-                    # 3. Bersihkan image-image tua yang sudah tidak terpakai (menghemat disk)
-                    docker image prune -f
-
-                    echo "=== DEPLOY DONE ==="
-                '''
-            }
+          steps {
+            sh '''
+              echo "=== DEPLOY START ==="
+    
+              # Paksa hapus container lama berdasarkan nama spesifiknya sebagai pengaman tambahan
+              docker rm -f asset_prod_app || true
+    
+              # Tambahkan opsi -p untuk mengunci nama project
+              docker-compose -p asset_prod down
+              docker-compose -p asset_prod up -d --build --force-recreate
+    
+              docker image prune -f
+    
+              echo "=== DEPLOY DONE ==="
+            '''
+          }
         }
     }
 }
