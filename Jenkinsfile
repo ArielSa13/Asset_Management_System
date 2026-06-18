@@ -1,23 +1,26 @@
 pipeline {
-  agent any
+    agent any
 
-  stages {
+    stages {
 
-    stage('Deploy') {
-  steps {
-    sh '''
-      echo "Deploy START"
+        stage('Deploy Production') {
+            steps {
+                sh '''
+                    echo "=== PRODUCTION DEPLOY START ==="
 
-      git config --global --add safe.directory /srv/apps/asset-staging
+                    git config --global --add safe.directory /srv/apps/asset-prod
 
-      cd /srv/apps/asset-staging
+                    cd /srv/apps/asset-prod
 
-      git pull origin develop
-      docker-compose down
-      docker-compose up -d --build
-    '''
-  }
-}
+                    git fetch origin
+                    git reset --hard origin/main
 
-  }
+                    docker compose up -d --build
+
+                    echo "=== PRODUCTION DEPLOY DONE ==="
+                '''
+            }
+        }
+
+    }
 }
