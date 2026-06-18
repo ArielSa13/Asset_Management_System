@@ -1,24 +1,19 @@
 services:
   app:
     build: .
-    container_name: asset_app
+    container_name: asset_prod_app
     restart: always
+
     ports:
-      - "8002:80"
+      - "8003:80"
+
     volumes:
       - .:/var/www/html
-    depends_on:
-      - db
 
-  db:
-    image: mysql:8.4
-    container_name: asset_db
-    restart: always
-    environment:
-      MYSQL_ROOT_PASSWORD: Ariel1302!
-      MYSQL_DATABASE: asset_db
-    volumes:
-      - asset_db_data:/var/lib/mysql
+    networks:
+      - shared
 
-volumes:
-  asset_db_data:
+networks:
+  shared:
+    external: true
+
