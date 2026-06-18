@@ -7,13 +7,9 @@ services:
     ports:
       - "8003:80"
 
-    volumes:
-      - .:/var/www/html
-
     networks:
       - shared
 
 networks:
   shared:
     external: true
-
