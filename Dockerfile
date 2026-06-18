@@ -71,5 +71,4 @@ RUN mkdir -p \
 RUN chown -R www-data:www-data /var/www/html \
     && chmod -R 775 storage bootstrap/cache
 
-# safety tmp
 RUN chmod 1777 /tmp
