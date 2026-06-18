@@ -3,23 +3,27 @@ pipeline {
 
   stages {
 
+    stage('Checkout') {
+      steps {
+        git branch: 'main',
+            url: 'https://github.com/ArielSa13/Asset_Management_System.git'
+      }
+    }
+
     stage('Deploy') {
-  steps {
-    sh '''
-      echo "Deploy START"
+      steps {
+        sh '''
+          echo "DEPLOY START"
 
-      git config --global --add safe.directory /srv/apps/asset-prod
+          docker-compose down
 
-      cd /srv/apps/asset-prod
+          docker-compose up -d --build --force-recreate
 
-      git pull origin main
-      
-      docker-compose down
-      docker-compose up -d --build
-      
-    '''
-  }
-}
+          docker image prune -f
 
+          echo "DEPLOY DONE"
+        '''
+      }
+    }
   }
 }
