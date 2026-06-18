@@ -1,34 +1,75 @@
 FROM php:8.4-apache
 
+# =========================
+# SYSTEM DEPENDENCIES
+# =========================
 RUN apt-get update && apt-get install -y \
-    git curl unzip zip libzip-dev libpng-dev libjpeg-dev libfreetype6-dev \
+    git curl unzip zip \
+    libzip-dev \
+    libpng-dev \
+    libjpeg-dev \
+    libfreetype6-dev \
+    libonig-dev \
+    libxml2-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo pdo_mysql zip gd
+    && docker-php-ext-install \
+        pdo \
+        pdo_mysql \
+        mbstring \
+        zip \
+        gd \
+        exif \
+        bcmath \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
+# =========================
+# COMPOSER
+# =========================
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
+# =========================
+# APACHE CONFIG
+# =========================
 RUN a2enmod rewrite
 
-ENV APACHE_DOCUMENT_ROOT /var/www/html/public
+ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
-RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/sites-available/*.conf \
- && sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
+    /etc/apache2/sites-available/*.conf \
+    /etc/apache2/apache2.conf \
+    /etc/apache2/conf-available/*.conf
 
+# =========================
+# WORKDIR
+# =========================
 WORKDIR /var/www/html
 
+# =========================
+# COPY PROJECT
+# =========================
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader || true
+# =========================
+# COMPOSER INSTALL
+# =========================
+RUN composer install --no-dev --optimize-autoloader --no-interaction || true
 
-RUN chown -R www-data:www-data /var/www/html
+# =========================
+# LARAVEL REQUIRED FOLDERS
+# =========================
+RUN mkdir -p \
+    storage/framework/cache \
+    storage/framework/sessions \
+    storage/framework/views \
+    storage/logs \
+    bootstrap/cache
 
-RUN mkdir -p /var/www/html/storage/framework/cache \
-    /var/www/html/storage/framework/sessions \
-    /var/www/html/storage/framework/views \
-    /var/www/html/bootstrap/cache \
- && chown -R www-data:www-data /var/www/html \
- && chmod -R 775 /var/www/html/storage \
- && chmod -R 775 /var/www/html/bootstrap/cache \
- && chmod 1777 /tmp
+# =========================
+# PERMISSION FIX (IMPORTANT)
+# =========================
+RUN chown -R www-data:www-data /var/www/html \
+    && chmod -R 775 storage bootstrap/cache
 
-
+# safety tmp
+RUN chmod 1777 /tmp
