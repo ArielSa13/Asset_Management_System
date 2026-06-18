@@ -104,12 +104,17 @@ class Borrowing extends Model
             return false;
         }
 
+        if (!$this->return_date) {
+            return false; // No return date set, can't be overdue
+        }
+
         return $this->return_date->isPast() && $this->status !== 'returned';
     }
 
-    public function getDaysRemainingAttribute(): int
+    public function getDaysRemainingAttribute(): ?int
     {
         if ($this->status === 'returned') return 0;
+        if (!$this->return_date) return null; // No deadline
         return now()->diffInDays($this->return_date, false);
     }
 }

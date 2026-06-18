@@ -27,7 +27,7 @@ class BorrowingService
                 'borrower_phone' => $data['borrower_phone'],
                 'purpose' => $data['purpose'],
                 'borrow_date' => $data['borrow_date'],
-                'return_date' => $data['return_date'],
+                'return_date' => $data['return_date'] ?? null,
                 'status' => 'pending',
             ]);
 
@@ -61,7 +61,7 @@ class BorrowingService
                 'new_values' => [
                     'borrower' => $borrowing->borrower_name,
                     'borrow_date' => $borrowing->borrow_date->format('Y-m-d'),
-                    'return_date' => $borrowing->return_date->format('Y-m-d'),
+                    'return_date' => $borrowing->return_date?->format('Y-m-d') ?? 'Belum ditentukan',
                 ],
                 'user_id' => auth()->id(),
                 'ip_address' => request()->ip(),
@@ -128,6 +128,7 @@ class BorrowingService
     public function checkOverdue(): int
     {
         $overdueBorrowings = Borrowing::whereIn('status', ['approved', 'borrowed'])
+            ->whereNotNull('return_date')
             ->where('return_date', '<', now()->toDateString())
             ->get();
 

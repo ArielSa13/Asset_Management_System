@@ -9,12 +9,13 @@ use SimpleSoftwareIO\QrCode\Facades\QrCode;
 class QrCodeService
 {
     /**
-     * Generate QR code for an asset.
+     * Generate QR code for an asset (SVG format - no imagick needed).
+     * ALWAYS uses current APP_URL so it auto-adapts to ngrok/production.
      */
     public function generate(Asset $asset): string
     {
-        $url = url("/scan/{$asset->kode_asset}");
-        $filename = "qrcodes/{$asset->kode_asset}.png";
+        $url = $this->getScanUrl($asset);
+        $filename = "qrcodes/{$asset->kode_asset}.svg";
         $path = storage_path("app/public/{$filename}");
 
         // Ensure directory exists
@@ -23,14 +24,40 @@ class QrCodeService
             mkdir($dir, 0755, true);
         }
 
-        // Generate QR code
-        QrCode::format('png')
+        // Generate QR code as SVG (no imagick extension needed)
+        $svg = QrCode::format('svg')
             ->size(config('app.qr_code_size', 300))
             ->errorCorrection('H')
             ->margin(1)
-            ->generate($url, $path);
+            ->generate($url);
+
+        file_put_contents($path, $svg);
 
         return $filename;
+    }
+
+    /**
+     * Generate QR code as inline SVG string (dynamic, always uses current URL).
+     * This is the PREFERRED method - no file caching, always up-to-date.
+     */
+    public function generateInlineSvg(Asset $asset, int $size = 300): string
+    {
+        $url = $this->getScanUrl($asset);
+
+        return QrCode::format('svg')
+            ->size($size)
+            ->errorCorrection('H')
+            ->margin(1)
+            ->generate($url);
+    }
+
+    /**
+     * Get the scan URL for an asset based on current APP_URL.
+     * This ensures QR codes always match the current domain (ngrok, production, etc.)
+     */
+    public function getScanUrl(Asset $asset): string
+    {
+        return rtrim(config('app.url'), '/') . "/scan/{$asset->kode_asset}";
     }
 
     /**
@@ -50,7 +77,24 @@ class QrCodeService
     }
 
     /**
-     * Get the public URL for a QR code.
+     * Regenerate ALL QR codes (useful when APP_URL changes, e.g. switching to ngrok).
+     * Run: php artisan qr:regenerate-all
+     */
+    public function regenerateAll(): int
+    {
+        $assets = Asset::all();
+        $count = 0;
+
+        foreach ($assets as $asset) {
+            $this->regenerate($asset);
+            $count++;
+        }
+
+        return $count;
+    }
+
+    /**
+     * Get the public URL for a QR code file.
      */
     public function getUrl(Asset $asset): ?string
     {

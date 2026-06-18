@@ -29,7 +29,7 @@
                     <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
                     <input type="email" id="email" name="email" value="{{ old('email') }}" required autofocus
                         class="w-full rounded-lg border-gray-300 text-sm focus:ring-blue-500 focus:border-blue-500 px-4 py-3"
-                        placeholder="admin@assetmanagement.com">
+                        placeholder="Enter your Email">
                 </div>
                 <div>
                     <label for="password" class="block text-sm font-medium text-gray-700 mb-1">Password</label>

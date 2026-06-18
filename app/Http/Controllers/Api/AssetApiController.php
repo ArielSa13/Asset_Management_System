@@ -15,7 +15,7 @@ class AssetApiController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $assets = Asset::with(['category', 'location'])
+        $assets = Asset::with(['category'])
             ->search($request->search)
             ->filterStatus($request->status)
             ->filterCategory($request->category_id ? (int) $request->category_id : null)
@@ -32,7 +32,7 @@ class AssetApiController extends Controller
      */
     public function show(Asset $asset): JsonResponse
     {
-        $asset->load(['category', 'location', 'activeBorrowing']);
+        $asset->load(['category', 'activeBorrowing']);
 
         return response()->json([
             'success' => true,
@@ -45,7 +45,7 @@ class AssetApiController extends Controller
      */
     public function scan(string $kode): JsonResponse
     {
-        $asset = Asset::with(['category', 'location', 'activeBorrowing'])
+        $asset = Asset::with(['category', 'activeBorrowing'])
             ->where('kode_asset', $kode)
             ->first();
 
@@ -58,7 +58,22 @@ class AssetApiController extends Controller
 
         return response()->json([
             'success' => true,
-            'data' => $asset,
+            'data' => [
+                'id' => $asset->id,
+                'kode_asset' => $asset->kode_asset,
+                'nama_asset' => $asset->nama_asset,
+                'merk' => $asset->merk ?? '-',
+                'model' => $asset->model ?? '-',
+                'serial_number' => $asset->serial_number ?? '-',
+                'kondisi' => $asset->kondisi,
+                'kondisi_label' => $asset->kondisi_label,
+                'status' => $asset->status,
+                'status_label' => $asset->status_label,
+                'status_badge' => $asset->status_badge,
+                'lokasi' => $asset->lokasi ?? '-',
+                'category' => $asset->category?->name ?? '-',
+                'borrower' => $asset->activeBorrowing?->borrower_name,
+            ],
         ]);
     }
 }

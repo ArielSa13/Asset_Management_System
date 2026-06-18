@@ -17,7 +17,6 @@
                 <option value="auth" {{ request('module') == 'auth' ? 'selected' : '' }}>Authentication</option>
                 <option value="asset" {{ request('module') == 'asset' ? 'selected' : '' }}>Assets</option>
                 <option value="category" {{ request('module') == 'category' ? 'selected' : '' }}>Categories</option>
-                <option value="location" {{ request('module') == 'location' ? 'selected' : '' }}>Locations</option>
                 <option value="borrowing" {{ request('module') == 'borrowing' ? 'selected' : '' }}>Borrowings</option>
             </select>
             <button type="submit" class="px-4 py-2 bg-gray-100 dark:bg-gray-700 text-sm font-medium rounded-lg hover:bg-gray-200">Filter</button>

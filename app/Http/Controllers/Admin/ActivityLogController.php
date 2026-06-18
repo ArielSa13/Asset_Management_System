@@ -24,7 +24,7 @@ class ActivityLogController extends Controller
         }
 
         $logs = $query->orderByDesc('created_at')
-            ->paginate(20)
+            ->paginate(50)
             ->withQueryString();
 
         return view('admin.activity-logs.index', compact('logs'));

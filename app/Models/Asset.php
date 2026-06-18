@@ -10,11 +10,16 @@ class Asset extends Model
 {
     use HasFactory, SoftDeletes;
 
+    protected $appends = [
+        'status_label',
+        'status_badge',
+        'kondisi_label',
+    ];
+
     protected $fillable = [
         'kode_asset',
         'nama_asset',
         'category_id',
-        'location_id',
         'serial_number',
         'merk',
         'model',
@@ -41,11 +46,6 @@ class Asset extends Model
     public function category()
     {
         return $this->belongsTo(Category::class);
-    }
-
-    public function location()
-    {
-        return $this->belongsTo(Location::class);
     }
 
     public function borrowings()

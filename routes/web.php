@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\BorrowingController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ExportController;
-use App\Http\Controllers\Admin\LocationController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Public\ScanController;
@@ -19,7 +18,9 @@ use Illuminate\Support\Facades\Route;
 */
 
 // QR Code Scan - Public Access (No Login Required)
-Route::get('/scan/{kode}', [ScanController::class, 'show'])->name('scan.show');
+Route::get('/scan/{kode}', [ScanController::class, 'show'])
+    ->name('scan.show')
+    ->middleware('throttle:30,1'); // Rate limiting: 30 requests per minute
 Route::post('/scan/borrow', [ScanController::class, 'requestBorrow'])
     ->name('scan.borrow')
     ->middleware('throttle:5,1'); // Rate limiting: 5 requests per minute
@@ -54,13 +55,17 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
 
     // Assets
     Route::resource('assets', AssetController::class);
+    Route::get('assets/{asset}/print-label', [AssetController::class, 'printLabel'])->name('assets.print-label');
+    Route::get('assets-print-labels', [AssetController::class, 'printLabelsBulk'])->name('assets.print-labels-bulk');
+    Route::get('assets-scanner', [AssetController::class, 'scanner'])->name('assets.scanner');
+    Route::post('assets-scanner/export-pdf', [AssetController::class, 'scannerExportPdf'])->name('assets.scanner.export-pdf');
     Route::post('assets/{asset}/regenerate-qr', [AssetController::class, 'regenerateQr'])->name('assets.regenerate-qr');
+    Route::get('assets-preview-code/{category}', [AssetController::class, 'previewCode'])->name('assets.preview-code');
+    Route::get('assets-import', [AssetController::class, 'showImport'])->name('assets.import');
+    Route::get('assets-template', [AssetController::class, 'downloadTemplate'])->name('assets.download-template');
 
     // Categories
     Route::resource('categories', CategoryController::class)->except(['show']);
-
-    // Locations
-    Route::resource('locations', LocationController::class)->except(['show']);
 
     // Borrowings
     Route::get('borrowings', [BorrowingController::class, 'index'])->name('borrowings.index');
@@ -75,7 +80,8 @@ Route::middleware('auth')->prefix('admin')->name('admin.')->group(function () {
     // Export/Import
     Route::get('export/assets', [ExportController::class, 'exportAssets'])->name('export.assets');
     Route::get('export/borrowings', [ExportController::class, 'exportBorrowings'])->name('export.borrowings');
-    Route::post('import/assets', [ExportController::class, 'importAssets'])->name('import.assets');
+    Route::post('import/assets/preview', [ExportController::class, 'previewImport'])->name('import.assets.preview');
+    Route::post('import/assets/confirm', [ExportController::class, 'confirmImport'])->name('import.assets.confirm');
 });
 
 // Redirect root to login or dashboard

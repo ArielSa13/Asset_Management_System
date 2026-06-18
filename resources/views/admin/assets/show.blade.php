@@ -18,6 +18,10 @@
             <p class="text-sm font-mono text-primary-600 dark:text-primary-400">{{ $asset->kode_asset }}</p>
         </div>
         <div class="flex items-center gap-2">
+            <a href="{{ route('admin.assets.print-label', $asset) }}" target="_blank" class="inline-flex items-center px-4 py-2 bg-indigo-500 hover:bg-indigo-600 text-white text-sm font-medium rounded-lg transition-colors" title="Print QR Label">
+                <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+                Print Label
+            </a>
             <a href="{{ route('admin.assets.edit', $asset) }}" class="inline-flex items-center px-4 py-2 bg-yellow-500 hover:bg-yellow-600 text-white text-sm font-medium rounded-lg transition-colors">
                 <svg class="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 Edit
@@ -60,7 +64,7 @@
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Location</dt>
-                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $asset->location?->full_location ?? $asset->lokasi ?? '-' }}</dd>
+                        <dd class="mt-1 text-sm text-gray-900 dark:text-white">{{ $asset->lokasi ?? '-' }}</dd>
                     </div>
                     <div>
                         <dt class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase">Purchase Date</dt>
@@ -98,7 +102,7 @@
                             <span class="text-sm font-medium text-gray-900 dark:text-white">{{ $borrowing->borrower_name }}</span>
                             <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $borrowing->status_badge }}">{{ $borrowing->status_label }}</span>
                         </div>
-                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date->format('d M Y') }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $borrowing->borrow_date->format('d M Y') }} - {{ $borrowing->return_date ? $borrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                     </div>
                     @endforeach
                 </div>
@@ -133,14 +137,11 @@
             <!-- QR Code -->
             <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border dark:border-gray-700 p-6 text-center">
                 <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">QR Code</h3>
-                @if($asset->qr_code)
-                <img src="{{ Storage::url($asset->qr_code) }}" alt="QR Code" class="mx-auto w-48 h-48 border rounded-lg">
-                @else
-                <div class="w-48 h-48 mx-auto bg-gray-100 dark:bg-gray-700 rounded-lg flex items-center justify-center">
-                    <p class="text-sm text-gray-500 dark:text-gray-400">No QR Code</p>
+                <div class="mx-auto w-48 h-48 border rounded-lg overflow-hidden flex items-center justify-center bg-white p-2">
+                    {!! QrCode::format('svg')->size(180)->errorCorrection('H')->margin(1)->generate(url("/scan/{$asset->kode_asset}")) !!}
                 </div>
-                @endif
-                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400 font-mono">{{ $asset->kode_asset }}</p>
+                <p class="mt-3 text-xs text-gray-500 dark:text-gray-400 font-mono">{{ $asset->kode_asset }}</p>
+                <p class="mt-1 text-xs text-primary-600 dark:text-primary-400 break-all">{{ url("/scan/{$asset->kode_asset}") }}</p>
             </div>
 
             <!-- Photo -->
@@ -162,7 +163,7 @@
                 <div class="space-y-2">
                     <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Name:</span> {{ $asset->activeBorrowing->borrower_name }}</p>
                     <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Email:</span> {{ $asset->activeBorrowing->borrower_email }}</p>
-                    <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Return:</span> {{ $asset->activeBorrowing->return_date->format('d M Y') }}</p>
+                    <p class="text-sm"><span class="font-medium text-gray-700 dark:text-gray-300">Return:</span> {{ $asset->activeBorrowing->return_date ? $asset->activeBorrowing->return_date->format('d M Y') : 'Belum ditentukan' }}</p>
                     <span class="px-2 py-0.5 text-xs font-medium rounded-full {{ $asset->activeBorrowing->status_badge }}">{{ $asset->activeBorrowing->status_label }}</span>
                 </div>
             </div>

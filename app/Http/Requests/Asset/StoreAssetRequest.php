@@ -16,18 +16,17 @@ class StoreAssetRequest extends FormRequest
         return [
             'nama_asset' => ['required', 'string', 'max:255'],
             'category_id' => ['required', 'exists:categories,id'],
-            'location_id' => ['nullable', 'exists:locations,id'],
             'serial_number' => ['nullable', 'string', 'max:255'],
             'merk' => ['nullable', 'string', 'max:255'],
             'model' => ['nullable', 'string', 'max:255'],
             'kondisi' => ['required', 'in:baik,cukup,rusak_ringan,rusak_berat'],
             'status' => ['required', 'in:available,borrowed,maintenance,broken,lost'],
             'lokasi' => ['nullable', 'string', 'max:255'],
+            'deskripsi' => ['nullable', 'string'],
+            'foto_asset' => ['nullable', 'image', 'mimes:jpeg,jpg,png,webp', 'max:2048'],
             'tanggal_pembelian' => ['nullable', 'date'],
             'harga' => ['nullable', 'numeric', 'min:0'],
             'supplier' => ['nullable', 'string', 'max:255'],
-            'deskripsi' => ['nullable', 'string'],
-            'foto_asset' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
         ];
     }
 

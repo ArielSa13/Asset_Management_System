@@ -34,7 +34,7 @@
                 <td>{{ $borrowing->asset?->kode_asset }} - {{ $borrowing->asset?->nama_asset }}</td>
                 <td>{{ $borrowing->borrower_name }}</td>
                 <td>{{ $borrowing->borrow_date->format('d M Y') }}</td>
-                <td>{{ $borrowing->return_date->format('d M Y') }}</td>
+                <td>{{ $borrowing->return_date ? $borrowing->return_date->format('d M Y') : '-' }}</td>
                 <td>{{ $borrowing->status_label }}</td>
             </tr>
             @endforeach

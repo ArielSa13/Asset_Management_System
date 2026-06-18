@@ -1,0 +1,36 @@
+name: Deploy Laravel
+
+on:
+  push:
+    branches:
+      - develop
+      - main
+      - feature/full-asset-management-system
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            if [ "${GITHUB_REF##*/}" = "develop" ]; then
+              echo "Deploy STAGING"
+              cd /srv/apps/asset-staging
+              git pull origin develop
+              docker exec asset_app_stage php artisan migrate --force
+              docker restart asset_app_stage
+            fi
+
+            if [ "${GITHUB_REF##*/}" = "main" ]; then
+              echo "Deploy PRODUCTION"
+              cd /srv/apps/asset-prod
+              git pull origin main
+              docker exec asset_app php artisan migrate --force
+              docker restart asset_app
+            fi
