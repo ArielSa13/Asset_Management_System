@@ -31,3 +31,4 @@ RUN mkdir -p /var/www/html/storage/framework/cache \
  && chmod -R 775 /var/www/html/bootstrap/cache \
  && chmod 1777 /tmp
 
+
